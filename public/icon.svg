@@ -1,0 +1,32 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @media (prefers-color-scheme: light) {
+      .background { fill: #4f7cff; }
+      .foreground { fill: white; }
+      .accent { fill: #a78bfa; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .background { fill: #1a1f3a; }
+      .foreground { fill: #4f7cff; }
+      .accent { fill: #a78bfa; }
+    }
+  </style>
+  <g clip-path="url(#clip0_ev)">
+    <rect class="background" width="180" height="180" rx="40" />
+    <!-- Electric bolt icon -->
+    <g transform="translate(45, 30)">
+      <path class="foreground" d="M50 0L20 60H40L30 120L80 50H55L50 0Z" stroke-width="3" stroke-linejoin="round"/>
+    </g>
+    <!-- Battery outline at bottom -->
+    <g transform="translate(50, 100)">
+      <rect class="accent" x="0" y="0" width="80" height="40" rx="8" stroke-width="3" opacity="0.6"/>
+      <rect class="foreground" x="5" y="5" width="50" height="30" rx="4"/>
+      <rect class="accent" x="82" y="12" width="8" height="16" rx="2"/>
+    </g>
+  </g>
+  <defs>
+    <clipPath id="clip0_ev">
+      <rect width="180" height="180" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
