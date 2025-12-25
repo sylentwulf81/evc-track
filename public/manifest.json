@@ -1,6 +1,6 @@
 {
-  "name": "EV Charging Tracker",
-  "short_name": "EV Charge",
+  "name": "EVC Track",
+  "short_name": "EVC Track",
   "description": "Track your EV charging costs and history",
   "start_url": "/",
   "display": "standalone",

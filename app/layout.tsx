@@ -8,14 +8,14 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "EV Charging Tracker",
+  title: "EVC Track",
   description: "Track your EV charging costs and history in yen",
   generator: "v0.app",
-  applicationName: "EV Charging Tracker",
+  applicationName: "EVC Track",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "EV Charge",
+    title: "EVC Track",
   },
   formatDetection: {
     telephone: false,

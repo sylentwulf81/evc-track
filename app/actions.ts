@@ -59,3 +59,56 @@ export async function getChargingSessions() {
 
   return data || []
 }
+
+export async function getProfile() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return null
+
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+
+  if (error) {
+    // If no profile exists, return defaults or null. 
+    // It's common for the row not to exist yet if we didn't insert on signup trigger.
+    return null
+  }
+
+  return data
+}
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: "Not authenticated" }
+  }
+
+  const batteryCapacity = formData.get("batteryCapacity")
+    ? Number.parseFloat(formData.get("batteryCapacity") as string)
+    : null
+
+  const homeRate = formData.get("homeRate")
+    ? Number.parseFloat(formData.get("homeRate") as string)
+    : null
+
+  const { error } = await supabase.from("profiles").upsert({
+    id: user.id,
+    battery_capacity: batteryCapacity,
+    home_rate: homeRate,
+    updated_at: new Date().toISOString(),
+  })
+
+  if (error) {
+    console.error("Error updating profile:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/settings")
+  return { success: true }
+}

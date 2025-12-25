@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Zap, LogOut, LogIn, Cloud, CloudOff } from "lucide-react"
+import { Zap, LogOut, LogIn, Cloud, CloudOff, Settings, BarChart3, List } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ChargingHistory } from "@/components/charging-history"
+import { AnalyticsView } from "@/components/analytics-view"
 import { AddChargeDialog } from "@/components/add-charge-dialog"
 import { EditSessionDialog } from "@/components/edit-session-dialog"
 import {
@@ -23,6 +24,7 @@ export function ChargingTracker() {
   const [loading, setLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [showAnalytics, setShowAnalytics] = useState(false)
   const supabase = createClient()
 
   const loadSessions = useCallback(async () => {
@@ -172,12 +174,25 @@ export function ChargingTracker() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  EV Charging
+                  EVC Track
                 </h1>
                 <p className="text-xs text-muted-foreground">Track your costs</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowAnalytics(!showAnalytics)}
+                title={showAnalytics ? "Show History" : "Show Analytics"}
+              >
+                  {showAnalytics ? <List className="h-5 w-5" /> : <BarChart3 className="h-5 w-5" />}
+              </Button>
+              <Link href="/settings">
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </Link>
               {user ? (
                 <>
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -207,9 +222,13 @@ export function ChargingTracker() {
         </div>
       </header>
       <main className="container mx-auto px-4 py-6 pb-24">
-        <ChargingHistory sessions={sessions} onSessionClick={handleSessionClick} />
+        {showAnalytics ? (
+            <AnalyticsView sessions={sessions} />
+        ) : (
+            <ChargingHistory sessions={sessions} onSessionClick={handleSessionClick} />
+        )}
       </main>
-      <AddChargeDialog onAdd={handleAddSession} />
+      {!showAnalytics && <AddChargeDialog onAdd={handleAddSession} user={user} />}
       <EditSessionDialog
         session={selectedSession}
         open={editDialogOpen}
