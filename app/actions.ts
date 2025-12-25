@@ -116,3 +116,62 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/settings")
   return { success: true }
 }
+
+export async function addVehicleExpense(data: {
+  title: string
+  amount: number
+  expense_date: string
+  category: string
+  description?: string | null
+  odometer?: number | null
+  location?: string | null
+}) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: "Not authenticated" }
+  }
+
+  const { error } = await supabase.from("vehicle_expenses").insert({
+    title: data.title,
+    amount: data.amount,
+    expense_date: data.expense_date,
+    category: data.category,
+    description: data.description,
+    odometer: data.odometer,
+    location: data.location,
+    user_id: user.id,
+  })
+
+  if (error) {
+    console.error("Error adding expense:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/")
+  return { success: true }
+}
+
+export async function deleteVehicleExpense(id: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: "Not authenticated" }
+  }
+
+  const { error } = await supabase.from("vehicle_expenses").delete().eq("id", id)
+
+  if (error) {
+    console.error("Error deleting expense:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/")
+  return { success: true }
+}

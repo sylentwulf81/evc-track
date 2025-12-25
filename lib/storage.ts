@@ -10,7 +10,21 @@ export interface ChargingSession {
   charge_type?: "fast" | "standard" | null
 }
 
+
+export interface VehicleExpense {
+  id: string
+  user_id: string | null
+  title: string
+  amount: number
+  expense_date: string
+  category: "maintenance" | "repair" | "insurance" | "tax" | "other"
+  description?: string | null
+  odometer?: number | null
+  location?: string | null
+}
+
 const STORAGE_KEY = "ev_charging_sessions"
+const EXPENSES_STORAGE_KEY = "ev_vehicle_expenses"
 
 export function getLocalSessions(): ChargingSession[] {
   if (typeof window === "undefined") return []
@@ -48,4 +62,29 @@ export function updateLocalSession(id: string, updates: Partial<Omit<ChargingSes
     sessions[index] = { ...sessions[index], ...updates }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions))
   }
+}
+
+// Expense helpers
+export function getLocalExpenses(): VehicleExpense[] {
+  if (typeof window === "undefined") return []
+  const data = localStorage.getItem(EXPENSES_STORAGE_KEY)
+  return data ? JSON.parse(data) : []
+}
+
+export function addLocalExpense(expense: Omit<VehicleExpense, "id" | "user_id">): VehicleExpense {
+  const expenses = getLocalExpenses()
+  const newExpense: VehicleExpense = {
+    ...expense,
+    id: crypto.randomUUID(),
+    user_id: null,
+  }
+  expenses.unshift(newExpense)
+  localStorage.setItem(EXPENSES_STORAGE_KEY, JSON.stringify(expenses))
+  return newExpense
+}
+
+export function deleteLocalExpense(id: string): void {
+  const expenses = getLocalExpenses()
+  const filtered = expenses.filter((e) => e.id !== id)
+  localStorage.setItem(EXPENSES_STORAGE_KEY, JSON.stringify(filtered))
 }
