@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ChargingSession, VehicleExpense } from "@/lib/storage"
 import { format, parseISO, startOfMonth, subMonths } from "date-fns"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface AnalyticsViewProps {
   sessions: ChargingSession[]
@@ -25,6 +26,8 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
 const EXPENSE_COLORS = ["#FF8042", "#8884d8", "#82ca9d", "#ffc658", "#a4de6c"]
 
 export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
+  const { t } = useLanguage()
+
   // Helpers
   const formatCurrency = (amount: number, currency: string) => {
     const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "¥"
@@ -125,7 +128,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
   if (sessions.length === 0 && expenses.length === 0) {
       return (
           <div className="text-center py-10 text-muted-foreground">
-              No data available for analytics. Start adding charging sessions or expenses!
+              {t('analytics.noData')}
           </div>
       )
   }
@@ -135,8 +138,8 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-1 md:col-span-2">
           <CardHeader>
-            <CardTitle>Total Monthly Spending</CardTitle>
-            <CardDescription>Combined charging and maintenance costs (nominal)</CardDescription>
+            <CardTitle>{t('analytics.monthlySpending')}</CardTitle>
+            <CardDescription>{t('analytics.combinedCosts')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
              <ResponsiveContainer width="100%" height="100%">
@@ -155,8 +158,8 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
                 <Legend />
-                <Bar dataKey="charging" name="Charging" stackId="a" fill="#4f7cff" radius={[0, 0, 4, 4]} />
-                <Bar dataKey="expenses" name="Expenses" stackId="a" fill="#ff8042" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="charging" name={t('nav.charging')} stackId="a" fill="#4f7cff" radius={[0, 0, 4, 4]} />
+                <Bar dataKey="expenses" name={t('nav.expenses')} stackId="a" fill="#ff8042" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -164,8 +167,8 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
 
         <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>Charging Costs</CardTitle>
-            <CardDescription>By Charge Type</CardDescription>
+            <CardTitle>{t('analytics.chargingCosts')}</CardTitle>
+            <CardDescription>{t('analytics.byChargeType')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -192,8 +195,8 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
 
         <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>Vehicle Expenses</CardTitle>
-            <CardDescription>By Category</CardDescription>
+            <CardTitle>{t('analytics.vehicleExpenses')}</CardTitle>
+            <CardDescription>{t('analytics.byCategory')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             {expenses.length > 0 ? (
@@ -218,7 +221,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                 </ResponsiveContainer>
             ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
-                    No expense data
+                    {t('analytics.noExpenseData')}
                 </div>
             )}
           </CardContent>
@@ -228,33 +231,33 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
        <div className="grid gap-4 md:grid-cols-3">
           <Card>
               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Grand Total Spent</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('analytics.grandTotal')}</CardTitle>
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
                     {formatTotalString(grandTotals)}
                   </div>
-                  <p className="text-xs text-muted-foreground">Charging + Expenses</p>
+                  <p className="text-xs text-muted-foreground">{t('analytics.chargingPlusExpenses')}</p>
               </CardContent>
           </Card>
           <Card>
               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Charging Total</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('analytics.chargingTotal')}</CardTitle>
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">{formatTotalString(chargingTotals)}</div>
-                  <p className="text-xs text-muted-foreground">{sessions.length} sessions</p>
+                  <p className="text-xs text-muted-foreground">{sessions.length} {t('common.sessions') || 'sessions'}</p>
               </CardContent>
           </Card>
            <Card>
               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Expenses Total</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('analytics.expensesTotal')}</CardTitle>
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
                     {formatTotalString(expenseTotals)}
                   </div>
-                  <p className="text-xs text-muted-foreground">{expenses.length} records</p>
+                  <p className="text-xs text-muted-foreground">{expenses.length} {t('common.records') || 'records'}</p>
               </CardContent>
           </Card>
        </div>

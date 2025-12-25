@@ -18,6 +18,13 @@ export type TranslationKeys = {
         cost: string
         error: string
         success: string
+        optional: string
+        close: string
+        saving: string
+        saveChanges: string
+        deleting: string
+        records: string
+        sessions: string
     }
     nav: {
         charging: string
@@ -35,6 +42,24 @@ export type TranslationKeys = {
         addManual: string
         addExpense: string
         noSessions: string
+        addCharge: string
+        enterDetails: string
+        homeCharge: string
+        autoCalc: string
+        chargeType: string
+        fast: string
+        standard: string
+        addSession: string
+        expenseAdded: string
+        sessionAdded: string
+        enterExpenseDetails: string
+        sessionDetails: string
+        editSession: string
+        updateSessionDetails: string
+        fastFast: string
+        standardStandard: string
+        deleteConfirm: string
+        deleteWarning: string
     }
     history: {
         total: string
@@ -72,6 +97,18 @@ export type TranslationKeys = {
         amount: string
         title: string
         odometer: string
+        vehicleBattery: string
+        homeRate: string
+        titlePlaceholder: string
+        notesPlaceholder: string
+        energy: string
+        dateTime: string
+        chargingProgress: string
+        maintenance: string
+        repair: string
+        insurance: string
+        tax: string
+        other: string
     }
     expenseCategories: {
         maintenance: string
@@ -79,6 +116,20 @@ export type TranslationKeys = {
         insurance: string
         tax: string
         other: string
+    }
+    analytics: {
+        noData: string
+        monthlySpending: string
+        combinedCosts: string
+        chargingCosts: string
+        byChargeType: string
+        vehicleExpenses: string
+        byCategory: string
+        noExpenseData: string
+        grandTotal: string
+        chargingPlusExpenses: string
+        chargingTotal: string
+        expensesTotal: string
     }
 }
 
@@ -101,6 +152,13 @@ export const translations: Record<Language, TranslationKeys> = {
             cost: "Cost",
             error: "Error",
             success: "Success",
+            optional: "Optional",
+            close: "Close",
+            saving: "Saving...",
+            saveChanges: "Save Changes",
+            deleting: "Deleting...",
+            records: "records",
+            sessions: "sessions",
         },
         nav: {
             charging: "Charging",
@@ -118,6 +176,24 @@ export const translations: Record<Language, TranslationKeys> = {
             addManual: "Add Charge",
             addExpense: "Add Expense",
             noSessions: "No sessions yet",
+            addCharge: "Add Session",
+            enterDetails: "Enter the details of your charging session.",
+            homeCharge: "Home Charge",
+            autoCalc: "Auto-calc cost",
+            chargeType: "Charge Type",
+            fast: "Fast",
+            standard: "Standard",
+            addSession: "Add Session",
+            expenseAdded: "Expense added successfully",
+            sessionAdded: "Charging session added",
+            enterExpenseDetails: "Log a maintenance, repair, or other vehicle cost",
+            sessionDetails: "Session Details",
+            editSession: "Edit Session",
+            updateSessionDetails: "Update the details of this charging session",
+            fastFast: "Fast Charge",
+            standardStandard: "Standard Charge",
+            deleteConfirm: "Delete charging session?",
+            deleteWarning: "This action cannot be undone. This will permanently delete this charging session.",
         },
         history: {
             total: "Total",
@@ -155,6 +231,18 @@ export const translations: Record<Language, TranslationKeys> = {
             amount: "Amount",
             title: "Title",
             odometer: "Odometer",
+            vehicleBattery: "Vehicle Battery",
+            homeRate: "Home Rate",
+            titlePlaceholder: "e.g. Oil Change, New Tires",
+            notesPlaceholder: "Additional details...",
+            energy: "Energy",
+            dateTime: "Date & Time",
+            chargingProgress: "Charging Progress",
+            maintenance: "Maintenance",
+            repair: "Repair",
+            insurance: "Insurance",
+            tax: "Tax",
+            other: "Other",
         },
         expenseCategories: {
             maintenance: "Maintenance",
@@ -163,6 +251,20 @@ export const translations: Record<Language, TranslationKeys> = {
             tax: "Tax",
             other: "Other",
         },
+        analytics: {
+            noData: "No data available for analytics. Start adding charging sessions or expenses!",
+            monthlySpending: "Total Monthly Spending",
+            combinedCosts: "Combined charging and maintenance costs (nominal)",
+            chargingCosts: "Charging Costs",
+            byChargeType: "By Charge Type",
+            vehicleExpenses: "Vehicle Expenses",
+            byCategory: "By Category",
+            noExpenseData: "No expense data",
+            grandTotal: "Grand Total Spent",
+            chargingPlusExpenses: "Charging + Expenses",
+            chargingTotal: "Charging Total",
+            expensesTotal: "Expenses Total",
+        }
     },
     es: {
         common: {
@@ -182,6 +284,13 @@ export const translations: Record<Language, TranslationKeys> = {
             cost: "Costo",
             error: "Error",
             success: "Éxito",
+            optional: "Opcional",
+            close: "Cerrar",
+            saving: "Guardando...",
+            saveChanges: "Guardar Cambios",
+            deleting: "Eliminando...",
+            records: "registros",
+            sessions: "sesiones",
         },
         nav: {
             charging: "Carga",
@@ -199,6 +308,24 @@ export const translations: Record<Language, TranslationKeys> = {
             addManual: "Añadir Carga",
             addExpense: "Añadir Gasto",
             noSessions: "Sin sesiones aún",
+            addCharge: "Añadir Sesión",
+            enterDetails: "Introduce los detalles de tu sesión de carga.",
+            homeCharge: "Carga en Casa",
+            autoCalc: "Auto-calc costo",
+            chargeType: "Tipo de Carga",
+            fast: "Rápida",
+            standard: "Estándar",
+            addSession: "Añadir Sesión",
+            expenseAdded: "Gasto añadido con éxito",
+            sessionAdded: "Sesión de carga añadida",
+            enterExpenseDetails: "Registra un mantenimiento, reparación u otro costo",
+            sessionDetails: "Detalles de la Sesión",
+            editSession: "Editar Sesión",
+            updateSessionDetails: "Actualizar los detalles de esta sesión",
+            fastFast: "Carga Rápida",
+            standardStandard: "Carga Estándar",
+            deleteConfirm: "¿Eliminar sesión de carga?",
+            deleteWarning: "Esta acción no se puede deshacer. Eliminará permanentemente esta sesión.",
         },
         history: {
             total: "Total",
@@ -236,6 +363,18 @@ export const translations: Record<Language, TranslationKeys> = {
             amount: "Monto",
             title: "Título",
             odometer: "Odómetro",
+            vehicleBattery: "Batería Vehículo",
+            homeRate: "Tarifa Hogar",
+            titlePlaceholder: "ej. Cambio de Aceite",
+            notesPlaceholder: "Detalles adicionales...",
+            energy: "Energía",
+            dateTime: "Fecha y Hora",
+            chargingProgress: "Progreso Carga",
+            maintenance: "Mantenimiento",
+            repair: "Reparación",
+            insurance: "Seguro",
+            tax: "Impuesto",
+            other: "Otro",
         },
         expenseCategories: {
             maintenance: "Mantenimiento",
@@ -244,6 +383,20 @@ export const translations: Record<Language, TranslationKeys> = {
             tax: "Impuesto",
             other: "Otro",
         },
+        analytics: {
+            noData: "No hay datos disponibles. ¡Comienza a añadir sesiones o gastos!",
+            monthlySpending: "Gasto Mensual Total",
+            combinedCosts: "Costos combinados de carga y mantenimiento",
+            chargingCosts: "Costos de Carga",
+            byChargeType: "Por Tipo de Carga",
+            vehicleExpenses: "Gastos del Vehículo",
+            byCategory: "Por Categoría",
+            noExpenseData: "Sin datos de gastos",
+            grandTotal: "Gran Total Gastado",
+            chargingPlusExpenses: "Carga + Gastos",
+            chargingTotal: "Total Carga",
+            expensesTotal: "Total Gastos",
+        }
     },
     ja: {
         common: {
@@ -263,6 +416,13 @@ export const translations: Record<Language, TranslationKeys> = {
             cost: "費用",
             error: "エラー",
             success: "成功",
+            optional: "任意",
+            close: "閉じる",
+            saving: "保存中...",
+            saveChanges: "変更を保存",
+            deleting: "削除中...",
+            records: "件",
+            sessions: "回",
         },
         nav: {
             charging: "充電",
@@ -280,6 +440,24 @@ export const translations: Record<Language, TranslationKeys> = {
             addManual: "充電記録を追加",
             addExpense: "経費を追加",
             noSessions: "セッションはまだありません",
+            addCharge: "セッションを追加",
+            enterDetails: "充電セッションの詳細を入力してください。",
+            homeCharge: "自宅充電",
+            autoCalc: "自動計算",
+            chargeType: "充電タイプ",
+            fast: "急速",
+            standard: "普通",
+            addSession: "セッションを追加",
+            expenseAdded: "経費を追加しました",
+            sessionAdded: "充電セッションを追加しました",
+            enterExpenseDetails: "メンテナンス、修理、その他の費用を記録",
+            sessionDetails: "セッション詳細",
+            editSession: "セッション編集",
+            updateSessionDetails: "このセッションの詳細を更新",
+            fastFast: "急速充電",
+            standardStandard: "普通充電",
+            deleteConfirm: "セッションを削除しますか？",
+            deleteWarning: "この操作は取り消せません。この充電セッションは完全に削除されます。",
         },
         history: {
             total: "合計",
@@ -317,6 +495,18 @@ export const translations: Record<Language, TranslationKeys> = {
             amount: "金額",
             title: "タイトル",
             odometer: "オドメーター",
+            vehicleBattery: "バッテリー容量",
+            homeRate: "自宅単価",
+            titlePlaceholder: "例: オイル交換、タイヤ交換",
+            notesPlaceholder: "詳細...",
+            energy: "エネルギー",
+            dateTime: "日時",
+            chargingProgress: "充電状況",
+            maintenance: "メンテナンス",
+            repair: "修理",
+            insurance: "保険",
+            tax: "税金",
+            other: "その他",
         },
         expenseCategories: {
             maintenance: "メンテナンス",
@@ -325,5 +515,19 @@ export const translations: Record<Language, TranslationKeys> = {
             tax: "税金",
             other: "その他",
         },
+        analytics: {
+            noData: "データがありません。充電や経費を追加してください！",
+            monthlySpending: "月間総支出",
+            combinedCosts: "充電とメンテナンスの合計コスト",
+            chargingCosts: "充電コスト",
+            byChargeType: "充電タイプ別",
+            vehicleExpenses: "車両経費",
+            byCategory: "カテゴリー別",
+            noExpenseData: "経費データなし",
+            grandTotal: "総支出",
+            chargingPlusExpenses: "充電 + 経費",
+            chargingTotal: "充電合計",
+            expensesTotal: "経費合計",
+        }
     },
 }

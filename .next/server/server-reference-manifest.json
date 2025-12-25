@@ -1,5 +1,58 @@
 {
-  "node": {},
+  "node": {
+    "0079bf4b990f06a8a50541d1908e132e40c26a8b35": {
+      "workers": {
+        "app/page": {
+          "moduleId": 57526,
+          "async": false,
+          "exportedName": "getProfile",
+          "filename": "app/actions.ts"
+        },
+        "app/settings/page": {
+          "moduleId": 95031,
+          "async": false,
+          "exportedName": "getProfile",
+          "filename": "app/actions.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/settings/page": "action-browser"
+      },
+      "filename": "app/actions.ts",
+      "exportedName": "getProfile"
+    },
+    "4024f26f6e4f2e8f45b2e2692fc8e65b112e5c32cb": {
+      "workers": {
+        "app/settings/page": {
+          "moduleId": 95031,
+          "async": false,
+          "exportedName": "updateProfile",
+          "filename": "app/actions.ts"
+        }
+      },
+      "layer": {
+        "app/settings/page": "action-browser"
+      },
+      "filename": "app/actions.ts",
+      "exportedName": "updateProfile"
+    },
+    "00fa75ca9b62b0091512d0f293da094299feb7af98": {
+      "workers": {
+        "app/settings/page": {
+          "moduleId": 95031,
+          "async": false,
+          "exportedName": "getChargingSessions",
+          "filename": "app/actions.ts"
+        }
+      },
+      "layer": {
+        "app/settings/page": "action-browser"
+      },
+      "filename": "app/actions.ts",
+      "exportedName": "getChargingSessions"
+    }
+  },
   "edge": {},
   "encryptionKey": "YM/CVCF8Ss6IRKN2GKPrYt2IATAh6o27gYvkNqoLp+c="
 }

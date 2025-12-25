@@ -45,10 +45,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return current as string
   }
 
-  // Prevent flash of default content if possible, or just render
-  if (!isLoaded) {
-    return <>{children}</> 
-  }
+  // Always provide context, even during initial load
+  // if (!isLoaded) {
+  //   return <>{children}</> 
+  // }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

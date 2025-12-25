@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getProfile } from "@/app/actions"
 import type { User } from "@supabase/supabase-js"
 import { toast } from "sonner"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface AddChargeDialogProps {
   onAdd: (data: {
@@ -37,9 +38,9 @@ const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
 export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   
   // Form State
   const [cost, setCost] = useState("")
@@ -105,22 +106,22 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
         setKwhAdded(""); // Clear kwhAdded if inputs are incomplete
         if (useHomeCharge) setCost(""); // Clear cost if home charge is active and inputs are incomplete
     }
-  }, [startPercent, endPercent, batteryCapacity, useHomeCharge, homeRate]) // Changed to useHomeCharge
+  }, [startPercent, endPercent, batteryCapacity, useHomeCharge, homeRate])
 
   // Auto-set charge type when toggling home charge
   useEffect(() => {
-    if (useHomeCharge) { // Changed to useHomeCharge
+    if (useHomeCharge) {
       setChargeType("standard")
     }
-  }, [useHomeCharge]) // Changed to useHomeCharge
+  }, [useHomeCharge])
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) { // Changed to async function
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
 
     // Only startPercent is mandatory
     if (!startPercent) {
-        toast.error("Please enter a starting percentage")
+        toast.error(t('common.error') || "Please enter a starting percentage")
         setLoading(false)
         return
     }
@@ -131,13 +132,13 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
 
     // Helper for validation only if value is provided
     if (start < 0 || start > 100) {
-      toast.error("Start percentage must be between 0 and 100")
+      toast.error(t('common.error') || "Start percentage must be between 0 and 100")
       setLoading(false)
       return
     }
     
     if (end !== null && (end < 0 || end > 100)) {
-        toast.error("End percentage must be between 0 and 100")
+        toast.error(t('common.error') || "End percentage must be between 0 and 100")
         setLoading(false)
         return
     }
@@ -146,8 +147,8 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
       cost: costVal,
       startPercent: start,
       endPercent: end,
-      kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined, // Changed to kwhAdded
-      chargeType: chargeType, // Passed directly
+      kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined,
+      chargeType: chargeType,
     })
 
     setLoading(false)
@@ -155,9 +156,9 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
     if (res.error) {
       toast.error(res.error)
     } else {
-      toast.success("Charging session added")
+      toast.success(t('tracker.sessionAdded') || "Charging session added")
       setOpen(false)
-      resetForm() // Use resetForm
+      resetForm()
     }
   }
 
@@ -165,9 +166,9 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
     setCost("")
     setStartPercent("")
     setEndPercent("")
-    setKwhAdded("") // Changed to kwhAdded
-    setChargeType("standard") // Default to standard
-    setUseHomeCharge(false) // Changed to useHomeCharge
+    setKwhAdded("")
+    setChargeType("standard")
+    setUseHomeCharge(false)
   }
 
   return (
@@ -182,23 +183,23 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Charging Session</DialogTitle>
+          <DialogTitle>{t('tracker.addCharge')}</DialogTitle>
           <DialogDescription>
-            Enter the details of your charging session.
+            {t('tracker.enterDetails') || "Enter the details of your charging session."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           
           {/* Home Charge Toggle */}
-          {(homeRate || batteryCapacity) && ( // Only show if relevant data exists
+          {(homeRate || batteryCapacity) && (
             <div className="flex items-center justify-between border p-3 rounded-lg bg-muted/20">
               <div className="flex items-center gap-2">
                   <div className={`p-2 rounded-full ${useHomeCharge ? 'bg-primary/20' : 'bg-muted'}`}>
                       <Home className={`h-4 w-4 ${useHomeCharge ? 'text-primary' : 'text-muted-foreground'}`} />
                   </div>
                   <div className="flex flex-col">
-                      <span className="text-sm font-medium">Home Charge</span>
-                      <span className="text-[10px] text-muted-foreground">Auto-calc cost</span>
+                      <span className="text-sm font-medium">{t('tracker.homeCharge')}</span>
+                      <span className="text-[10px] text-muted-foreground">{t('tracker.autoCalc') || "Auto-calc cost"}</span>
                   </div>
               </div>
               <Switch checked={useHomeCharge} onCheckedChange={setUseHomeCharge} />
@@ -207,7 +208,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="start">Start % <span className="text-destructive">*</span></Label>
+              <Label htmlFor="start">{t('forms.startPercent')} <span className="text-destructive">*</span></Label>
               <div className="relative">
                 <Input
                   id="start"
@@ -222,7 +223,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="end">End % <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
+              <Label htmlFor="end">{t('forms.endPercent')} <span className="text-xs text-muted-foreground font-normal">({t('common.optional')})</span></Label>
               <div className="relative">
                 <Input
                   id="end"
@@ -238,7 +239,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="cost">Cost (¥) <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
+            <Label htmlFor="cost">{t('forms.cost')} (¥) <span className="text-xs text-muted-foreground font-normal">({t('common.optional')})</span></Label>
             <div className="relative">
               <Input
                 id="cost"
@@ -260,7 +261,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
 
           {!useHomeCharge && (
             <div className="grid gap-2">
-                <Label>Charge Type</Label>
+                <Label>{t('tracker.chargeType')}</Label>
                 <div className="grid grid-cols-2 gap-2">
                 <Button
                     type="button"
@@ -270,8 +271,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
                 >
                     <Zap className="h-4 w-4" />
                     <div className="flex flex-col items-start">
-                    <span className="text-sm font-semibold">Fast</span>
-                    {/* <span className="text-[10px] opacity-80">Supercharger</span> */}
+                    <span className="text-sm font-semibold">{t('tracker.fast')}</span>
                     </div>
                 </Button>
                 <Button
@@ -282,8 +282,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
                 >
                     <Plug className="h-4 w-4" />
                     <div className="flex flex-col items-start">
-                    <span className="text-sm font-semibold">Standard</span>
-                    {/* <span className="text-[10px] opacity-80">Home / L2</span> */}
+                    <span className="text-sm font-semibold">{t('tracker.standard')}</span>
                     </div>
                 </Button>
                 </div>
@@ -291,23 +290,23 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
           )}
 
           {/* New Read-only Info Section */}
-          {(batteryCapacity || kwhAdded || (useHomeCharge && homeRate)) && ( // Adjusted condition to use state variables
+          {(batteryCapacity || kwhAdded || (useHomeCharge && homeRate)) && (
               <div className="mt-2 p-3 bg-muted/30 rounded-lg text-xs space-y-1 text-muted-foreground">
                   {batteryCapacity && (
                        <div className="flex justify-between">
-                         <span>Vehicle Battery:</span>
+                         <span>{t('forms.vehicleBattery') || "Vehicle Battery"}:</span>
                          <span className="font-medium">{batteryCapacity} kWh</span>
                        </div>
                   )}
                   {kwhAdded && (
                       <div className="flex justify-between">
-                        <span>Energy Added:</span>
+                        <span>{t('forms.kwhAdded') || "Energy Added"}:</span>
                         <span className="font-medium text-foreground">{Number(kwhAdded).toFixed(1)} kWh</span>
                       </div>
                   )}
                    {useHomeCharge && homeRate && (
                       <div className="flex justify-between">
-                        <span>Home Rate:</span>
+                        <span>{t('forms.homeRate') || "Home Rate"}:</span>
                         <span className="font-medium">{homeRate} ¥/kWh</span>
                       </div>
                   )}
@@ -316,7 +315,7 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
 
 
           <Button type="submit" disabled={loading} className="w-full mt-2">
-            {loading ? "Adding..." : "Add Session"}
+            {loading ? t('common.loading') : t('tracker.addSession')}
           </Button>
         </form>
       </DialogContent>

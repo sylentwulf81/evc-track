@@ -10,6 +10,7 @@ import {
 import type { ChargingSession } from "@/lib/storage"
 import { format } from "date-fns"
 import { Calendar, Battery, Zap, Edit, X } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface SessionDetailsDialogProps {
   session: ChargingSession | null
@@ -24,14 +25,23 @@ export function SessionDetailsDialog({
   onOpenChange,
   onEdit,
 }: SessionDetailsDialogProps) {
+  const { t } = useLanguage()
+
   if (!session) return null
+
+  // Helper to format currency
+  const formatCost = (cost: number | null, currency?: string) => {
+      if (cost === null) return '—'
+      const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "¥"
+      return `${symbol}${cost.toLocaleString()}`
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Session Details
+            {t('tracker.sessionDetails') || "Session Details"}
           </DialogTitle>
         </DialogHeader>
         
@@ -39,13 +49,13 @@ export function SessionDetailsDialog({
             {/* Header Stats */}
             <div className="flex items-center justify-between p-4 bg-muted/20 rounded-xl border">
                 <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Cost</span>
+                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('forms.cost')}</span>
                     <span className="text-3xl font-bold text-primary">
-                        {session.cost !== null ? `¥${session.cost.toLocaleString()}` : '—'}
+                        {formatCost(session.cost, session.currency)}
                     </span>
                 </div>
                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Energy</span>
+                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('forms.energy') || "Energy"}</span>
                      <span className="text-xl font-semibold flex items-center gap-1">
                         <Zap className="h-4 w-4 text-muted-foreground" />
                         {session.kwh ? `${session.kwh} kWh` : '—'}
@@ -60,7 +70,7 @@ export function SessionDetailsDialog({
                         <Calendar className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-sm text-muted-foreground">Date & Time</div>
+                        <div className="text-sm text-muted-foreground">{t('forms.dateTime') || "Date & Time"}</div>
                         <div className="font-medium">
                             {format(new Date(session.charged_at), "PPP p")}
                         </div>
@@ -72,7 +82,7 @@ export function SessionDetailsDialog({
                         <Battery className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-sm text-muted-foreground">Charging Progress</div>
+                        <div className="text-sm text-muted-foreground">{t('forms.chargingProgress') || "Charging Progress"}</div>
                         <div className="font-medium">
                             {session.start_percent}% → {session.end_percent !== null ? `${session.end_percent}%` : '...'}
                         </div>
@@ -84,9 +94,9 @@ export function SessionDetailsDialog({
                         <Zap className="h-5 w-5" />
                     </div>
                     <div>
-                        <div className="text-sm text-muted-foreground">Charge Type</div>
+                        <div className="text-sm text-muted-foreground">{t('tracker.chargeType')}</div>
                         <div className="font-medium capitalize">
-                            {session.charge_type || "Standard"}
+                            {session.charge_type === 'fast' ? t('tracker.fast') : t('tracker.standard')}
                         </div>
                     </div>
                 </div>
@@ -98,7 +108,7 @@ export function SessionDetailsDialog({
                     className="flex-1" 
                     onClick={() => onOpenChange(false)}
                 >
-                    Close
+                    {t('common.close')}
                 </Button>
                  <Button 
                     className="flex-1 gap-2" 
@@ -108,7 +118,7 @@ export function SessionDetailsDialog({
                     }}
                 >
                     <Edit className="h-4 w-4" />
-                    Edit Session
+                    {t('tracker.editSession')}
                 </Button>
             </div>
         </div>

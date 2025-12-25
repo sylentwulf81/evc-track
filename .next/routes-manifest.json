@@ -62,6 +62,12 @@
       "regex": "^/auth/signup(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/auth/signup(?:/)?$"
+    },
+    {
+      "page": "/settings",
+      "regex": "^/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/settings(?:/)?$"
     }
   ],
   "dataRoutes": [],

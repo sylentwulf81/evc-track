@@ -27,6 +27,7 @@ import {
 import { format } from "date-fns"
 import { Trash2 } from "lucide-react"
 import type { ChargingSession } from "@/lib/storage"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface EditSessionDialogProps {
   session: ChargingSession | null
@@ -47,6 +48,7 @@ interface EditSessionDialogProps {
 }
 
 export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelete }: EditSessionDialogProps) {
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -122,25 +124,25 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Charging Session</DialogTitle>
-            <DialogDescription>Update the details of this charging session</DialogDescription>
+            <DialogTitle>{t('tracker.editSession')}</DialogTitle>
+            <DialogDescription>{t('tracker.updateSessionDetails') || "Update the details of this charging session"}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="grid gap-6 py-4">
             
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
-                <Label htmlFor="edit-date">Date</Label>
+                <Label htmlFor="edit-date">{t('forms.date')}</Label>
                 <Input id="edit-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="h-11" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-time">Time</Label>
+                <Label htmlFor="edit-time">{t('forms.time') || "Time"}</Label>
                 <Input id="edit-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required className="h-11" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                <Label htmlFor="edit-startPercent">Start %</Label>
+                <Label htmlFor="edit-startPercent">{t('forms.startPercent')}</Label>
                 <Input
                     id="edit-startPercent"
                     type="number"
@@ -153,7 +155,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
                 />
                 </div>
                 <div className="space-y-2">
-                <Label htmlFor="edit-endPercent">End %</Label>
+                <Label htmlFor="edit-endPercent">{t('forms.endPercent')}</Label>
                 <Input
                     id="edit-endPercent"
                     type="number"
@@ -161,28 +163,28 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
                     onChange={(e) => setEndPercent(e.target.value)}
                     min="0"
                     max="100"
-                    placeholder="Optional"
+                    placeholder={t('common.optional') || "Optional"}
                     className="h-11"
                 />
                 </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-cost">Cost (¥)</Label>
+              <Label htmlFor="edit-cost">{t('forms.cost')} (¥)</Label>
               <Input
                 id="edit-cost"
                 type="number"
                 value={cost}
                 onChange={(e) => setCost(e.target.value)}
                 min="0"
-                placeholder="Optional"
+                placeholder={t('common.optional') || "Optional"}
                 className="h-11"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-kwh">
-                Energy (kWh) <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+                {t('forms.kwhAdded') || "Energy (kWh)"} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span>
               </Label>
               <Input
                 id="edit-kwh"
@@ -198,15 +200,15 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
             
             <div className="space-y-2">
               <Label htmlFor="edit-chargeType">
-                Charge Type <span className="text-muted-foreground text-xs font-normal">(optional)</span>
+                {t('tracker.chargeType')} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span>
               </Label>
               <Select value={chargeType || ""} onValueChange={(value: "fast" | "standard") => setChargeType(value)}>
                 <SelectTrigger id="edit-chargeType" className="h-11">
                   <SelectValue placeholder="Select charge type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fast">Fast Charge</SelectItem>
-                  <SelectItem value="standard">Standard Charge</SelectItem>
+                  <SelectItem value="fast">{t('tracker.fastFast') || "Fast Charge"}</SelectItem>
+                  <SelectItem value="standard">{t('tracker.standardStandard') || "Standard Charge"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -221,15 +223,15 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
                     className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto mt-2 sm:mt-0"
                 >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Session
+                    {t('common.delete') || "Delete Session"}
                 </Button>
 
                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="h-11 flex-1 sm:flex-none">
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={isLoading} className="h-11 flex-1 sm:flex-none min-w-[120px]">
-                        {isLoading ? "Saving..." : "Save Changes"}
+                        {isLoading ? t('common.saving') : t('common.saveChanges')}
                     </Button>
                </div>
             </div>
@@ -240,19 +242,19 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete charging session?</AlertDialogTitle>
+            <AlertDialogTitle>{t('tracker.deleteConfirm') || "Delete charging session?"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this charging session.
+              {t('tracker.deleteWarning') || "This action cannot be undone. This will permanently delete this charging session."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isLoading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isLoading ? "Deleting..." : "Delete"}
+              {isLoading ? t('common.deleting') : t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

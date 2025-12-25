@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Zap, LogOut, LogIn, Cloud, CloudOff, Settings, BarChart3, Menu, Wrench } from "lucide-react"
+import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -10,6 +10,12 @@ import {
   SheetClose,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { ChargingHistory } from "@/components/charging-history"
 import { AnalyticsView } from "@/components/analytics-view"
 import { AddChargeDialog } from "@/components/add-charge-dialog"
@@ -40,7 +46,8 @@ export function ChargingTracker() {
   const [loading, setLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState<ChargingSession | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<"charging" | "expenses" | "analytics">("charging")
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("tracker")
   const supabase = createClient()
 
   const loadData = useCallback(async () => {
@@ -119,7 +126,24 @@ export function ChargingTracker() {
       return {}
     }
   }
-  
+
+  const handleAddExpense = async (data: Omit<VehicleExpense, "id" | "user_id">) => {
+      if (user) {
+          const { error } = await supabase.from("vehicle_expenses").insert({
+              ...data,
+              user_id: user.id
+          })
+          if (!error) {
+              loadData()
+          }
+          return { error: error?.message }
+      } else {
+          addLocalExpense(data as VehicleExpense) 
+          loadData()
+          return {}
+      }
+  }
+
   const handleEditSession = async (
     id: string,
     updates: {
@@ -164,16 +188,9 @@ export function ChargingTracker() {
     }
   }
 
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
-  
   const handleSessionClick = (session: ChargingSession) => {
     setSelectedSession(session)
     setDetailsDialogOpen(true)
-  }
-
-  const handleEditClick = (session: ChargingSession) => {
-    setDetailsDialogOpen(false)
-    setEditDialogOpen(true)
   }
 
   const handleLogout = async () => {
@@ -192,83 +209,94 @@ export function ChargingTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Zap className="h-7 w-7 text-primary drop-shadow-[0_0_8px_rgba(79,124,255,0.5)]" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  EVC Track
-                </h1>
-                <p className="text-xs text-muted-foreground">Track your costs</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Desktop Actions */}
-              <div className="hidden md:flex items-center gap-2">
-                <Button 
-                  variant={viewMode === "charging" ? "secondary" : "ghost"} 
-                  size="sm"
-                  onClick={() => setViewMode("charging")}
-                >
-                    {t('nav.charging')}
+    <div className="min-h-screen bg-background pb-20 md:pb-6 relative overflow-x-hidden">
+       {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container px-4 py-3 mx-auto max-w-md flex items-center justify-between">
+           <div className="flex items-center gap-2">
+            <Zap className="h-6 w-6 text-primary filled" />
+            <h1 className="text-xl font-bold tracking-tight">EVC Track</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+             <Link href="/settings">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Settings className="h-5 w-5" />
                 </Button>
-                <Button 
-                  variant={viewMode === "expenses" ? "secondary" : "ghost"} 
-                  size="sm"
-                  onClick={() => setViewMode("expenses")}
-                >
-                    {t('nav.expenses')}
+              </Link>
+             {user ? (
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full">
+                  <LogOut className="h-5 w-5" />
                 </Button>
-                 <Button 
-                  variant={viewMode === "analytics" ? "secondary" : "ghost"} 
-                  size="icon" 
-                </Card>
+              ) : (
+                 <Link href="/login">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <LogIn className="h-5 w-5" />
+                  </Button>
+                </Link>
+              )}
+          </div>
+        </div>
+      </header>
 
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">{t('history.chargingHistory')}</h2>
-                    <AddChargeDialog onChargeAdded={loadData} />
-                </div>
+      <main className="container max-w-md mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <Tabs defaultValue="tracker" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
+            <TabsTrigger value="tracker" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
+              {t('nav.charging')}
+            </TabsTrigger>
+            <TabsTrigger value="expenses" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
+              {t('nav.expenses')}
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
+              {t('nav.analytics')}
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="tracker" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+             <div className="flex items-center justify-between">
+                 <h2 className="text-lg font-semibold tracking-tight">{t('history.chargingHistory')}</h2>
+             </div>
+             <ChargingHistory 
+                sessions={sessions} 
+                onSessionClick={handleSessionClick} 
+             />
+             <AddChargeDialog onAdd={handleAddSession} user={user} />
+          </TabsContent>
 
-                <ChargingHistory 
-                    sessions={sessions} 
-                    onSessionClick={(session) => {
-                        setSelectedSession(session)
-                        setIsDetailsOpen(true)
-                    }} 
-                />
-            </TabsContent>
+          <TabsContent value="expenses" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+             <div className="flex items-center justify-between">
+                 <h2 className="text-lg font-semibold tracking-tight">{t('history.expenseHistory')}</h2>
+             </div>
+             <ExpenseHistory expenses={expenses} />
+             <AddExpenseDialog onAdd={handleAddExpense} user={user} />
+          </TabsContent>
 
-             <TabsContent value="expenses" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">{t('history.expenseHistory')}</h2>
-                    <AddExpenseDialog onExpenseAdded={loadData} />
-                </div>
-                <ExpenseHistory expenses={expenses} />
-            </TabsContent>
-
-            <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0">
-                <AnalyticsView sessions={sessions} expenses={expenses} />
-            </TabsContent>
+          <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0">
+            <AnalyticsView sessions={sessions} expenses={expenses} />
+          </TabsContent>
         </Tabs>
       </main>
-      
+
       {/* Modals */}
       <SessionDetailsDialog 
         session={selectedSession} 
-        open={isDetailsOpen} 
-        onOpenChange={setIsDetailsOpen}
-        onDelete={handleDeleteSession}
-        onEdit={async (id, updates) => {
-             await handleEditSession(id, updates)
-             setIsDetailsOpen(false)     
+        open={detailsDialogOpen} 
+        onOpenChange={setDetailsDialogOpen}
+        onEdit={(session) => {
+            setSelectedSession(session)
+            setDetailsDialogOpen(false)
+            setEditDialogOpen(true)
         }}
+      />
+
+       <EditSessionDialog
+        session={selectedSession}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleEditSession}
+        onDelete={handleDeleteSession}
       />
     </div>
   )
 }
-```

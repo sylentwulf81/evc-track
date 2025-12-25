@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { addVehicleExpense } from "@/app/actions"
 import type { User } from "@supabase/supabase-js"
 import type { VehicleExpense } from "@/lib/storage"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface AddExpenseDialogProps {
   onAdd: (expense: Omit<VehicleExpense, "id" | "user_id">) => Promise<{ error?: string }>
@@ -26,6 +27,7 @@ interface AddExpenseDialogProps {
 }
 
 export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState("")
@@ -42,7 +44,7 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
 
     try {
       if (!title || !amount) {
-        throw new Error("Please fill in all required fields")
+        throw new Error(t('common.error') || "Please fill in all required fields")
       }
 
       const expenseData = {
@@ -53,20 +55,18 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
         description: description || null,
         odometer: odometer ? Number.parseInt(odometer) : null,
         location: location || null,
+        currency: "JPY", // Default currency
       }
 
       let result
-      if (user) {
-        result = await addVehicleExpense(expenseData)
-      } else {
-        result = await onAdd(expenseData)
-      }
+      // Always use onAdd, let parent handle storage logic (local vs remote)
+      result = await onAdd(expenseData)
 
       if (result.error) {
         throw new Error(result.error)
       }
 
-      toast.success("Expense added successfully")
+      toast.success(t('tracker.expenseAdded') || "Expense added successfully")
       setOpen(false)
       resetForm()
     } catch (error: any) {
@@ -95,15 +95,15 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
-          <DialogDescription>Log a maintenance, repair, or other vehicle cost</DialogDescription>
+          <DialogTitle>{t('tracker.addExpense')}</DialogTitle>
+          <DialogDescription>{t('tracker.enterExpenseDetails') || "Log a maintenance, repair, or other vehicle cost"}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('forms.title')}</Label>
             <Input
               id="title"
-              placeholder="e.g. Oil Change, New Tires"
+              placeholder={t('forms.titlePlaceholder') || "e.g. Oil Change, New Tires"}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -112,7 +112,7 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount (¥)</Label>
+              <Label htmlFor="amount">{t('forms.amount')} (¥)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -124,7 +124,7 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{t('forms.date')}</Label>
               <Input
                 id="date"
                 type="date"
@@ -136,23 +136,23 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{t('forms.category')}</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="repair">Repair</SelectItem>
-                <SelectItem value="insurance">Insurance</SelectItem>
-                <SelectItem value="tax">Tax</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="maintenance">{t('forms.maintenance')}</SelectItem>
+                <SelectItem value="repair">{t('forms.repair')}</SelectItem>
+                <SelectItem value="insurance">{t('forms.insurance')}</SelectItem>
+                <SelectItem value="tax">{t('forms.tax')}</SelectItem>
+                <SelectItem value="other">{t('forms.other')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="odometer">Odometer (km) <span className="text-muted-foreground text-xs font-normal">(optional)</span></Label>
+            <Label htmlFor="odometer">{t('forms.odometer')} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span></Label>
             <Input
               id="odometer"
               type="number"
@@ -163,7 +163,7 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location / Provider <span className="text-muted-foreground text-xs font-normal">(optional)</span></Label>
+            <Label htmlFor="location">{t('forms.location')} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span></Label>
             <Input
               id="location"
               placeholder="e.g. Tesla Service Center"
@@ -173,10 +173,10 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Notes <span className="text-muted-foreground text-xs font-normal">(optional)</span></Label>
+            <Label htmlFor="description">{t('forms.notes')} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span></Label>
             <Textarea
               id="description"
-              placeholder="Additional details..."
+              placeholder={t('forms.notesPlaceholder') || "Additional details..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="resize-none"
@@ -185,10 +185,10 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
 
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Expense"}
+              {loading ? t('common.loading') : t('tracker.addExpense')}
             </Button>
           </div>
         </form>
