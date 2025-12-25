@@ -70,7 +70,7 @@ export function AddChargeDialog({ onAdd }: AddChargeDialogProps) {
       <DialogTrigger asChild>
         <Button
           size="lg"
-          className="rounded-full h-16 w-16 fixed bottom-24 right-6 shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-all hover:scale-110 z-50"
+          className="rounded-full h-16 w-16 fixed bottom-6 left-6 shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-all hover:scale-110 z-50"
         >
           <Plus className="h-7 w-7" />
           <span className="sr-only">Add charge</span>
