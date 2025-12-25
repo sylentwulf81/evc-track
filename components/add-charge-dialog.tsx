@@ -31,13 +31,14 @@ interface AddChargeDialogProps {
     chargeType?: "fast" | "standard" | null
   }) => Promise<{ error?: string }>
   user: User | null
+  trigger?: React.ReactNode
 }
 
 // Local storage keys (matching settings page)
 const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
-export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
+export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) {
   const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -177,9 +178,11 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
         if (!val) resetForm()
     }}>
       <DialogTrigger asChild>
-        <Button className="rounded-full h-14 w-14 shadow-lg fixed bottom-6 left-6 z-50 p-0 hover:scale-105 transition-transform">
-          <Plus className="h-8 w-8" />
-        </Button>
+        {trigger || (
+          <Button className="rounded-full h-14 w-14 shadow-lg p-0 hover:scale-105 transition-transform">
+            <Plus className="h-8 w-8" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

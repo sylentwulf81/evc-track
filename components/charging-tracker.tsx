@@ -256,20 +256,68 @@ export function ChargingTracker() {
           <TabsContent value="tracker" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
              <div className="flex items-center justify-between">
                  <h2 className="text-lg font-semibold tracking-tight">{t('history.chargingHistory')}</h2>
+                 <div className="hidden md:block">
+                    <AddChargeDialog 
+                        onAdd={handleAddSession} 
+                        user={user} 
+                        trigger={
+                             <Button size="sm" className="gap-1">
+                                <Plus className="h-4 w-4" />
+                                {t('tracker.addCharge')}
+                             </Button>
+                        } 
+                    />
+                 </div>
              </div>
              <ChargingHistory 
                 sessions={sessions} 
                 onSessionClick={handleSessionClick} 
              />
-             <AddChargeDialog onAdd={handleAddSession} user={user} />
+             <div className="md:hidden">
+                <AddChargeDialog 
+                    onAdd={handleAddSession} 
+                    user={user} 
+                    // No trigger prop uses default FAB styling if we restore it, BUT 
+                    // we removed fixed positioning from default in AddChargeDialog.
+                    // So we must pass a FAB trigger here explicitly or restore fixed in default?
+                    // Let's pass a FAB trigger explicitly for mobile.
+                    trigger={
+                        <Button className="rounded-full h-14 w-14 shadow-lg fixed bottom-6 right-6 z-50 p-0 hover:scale-105 transition-transform">
+                             <Plus className="h-8 w-8" />
+                        </Button>
+                    }
+                />
+             </div>
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
              <div className="flex items-center justify-between">
                  <h2 className="text-lg font-semibold tracking-tight">{t('history.expenseHistory')}</h2>
+                  <div className="hidden md:block">
+                     <AddExpenseDialog 
+                        onAdd={handleAddExpense} 
+                        user={user} 
+                         trigger={
+                             <Button size="sm" className="gap-1 bg-orange-500 hover:bg-orange-600">
+                                <Wrench className="h-4 w-4" />
+                                {t('tracker.addExpense')}
+                             </Button>
+                        } 
+                     />
+                 </div>
              </div>
              <ExpenseHistory expenses={expenses} />
-             <AddExpenseDialog onAdd={handleAddExpense} user={user} />
+              <div className="md:hidden">
+                <AddExpenseDialog 
+                    onAdd={handleAddExpense} 
+                    user={user} 
+                    trigger={
+                        <Button className="h-14 w-14 rounded-full shadow-lg fixed bottom-6 right-6 z-50 p-0 bg-orange-500 hover:bg-orange-600 transition-transform hover:scale-105">
+                            <Wrench className="h-6 w-6" />
+                        </Button>
+                    }
+                />
+             </div>
           </TabsContent>
 
           <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0">

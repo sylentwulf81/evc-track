@@ -24,9 +24,10 @@ import { useLanguage } from "@/contexts/LanguageContext"
 interface AddExpenseDialogProps {
   onAdd: (expense: Omit<VehicleExpense, "id" | "user_id">) => Promise<{ error?: string }>
   user: User | null
+  trigger?: React.ReactNode
 }
 
-export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
+export function AddExpenseDialog({ onAdd, user, trigger }: AddExpenseDialogProps) {
   const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -89,9 +90,11 @@ export function AddExpenseDialog({ onAdd, user }: AddExpenseDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="h-14 w-14 rounded-full shadow-lg p-0 bg-orange-500 hover:bg-orange-600">
-          <Wrench className="h-6 w-6" />
-        </Button>
+        {trigger || (
+          <Button className="h-14 w-14 rounded-full shadow-lg p-0 bg-orange-500 hover:bg-orange-600">
+            <Wrench className="h-6 w-6" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
