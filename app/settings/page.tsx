@@ -5,19 +5,23 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Save, Car, Zap, Download } from "lucide-react"
+import { ArrowLeft, Save, Car, Zap, Download, Globe } from "lucide-react"
 import Link from "next/link"
 import { updateProfile, getProfile, getChargingSessions } from "@/app/actions"
-import { getLocalSessions } from "@/lib/storage"
+import { getLocalSessions, getLocalCurrency, setLocalCurrency } from "@/lib/storage"
 import { toast } from "sonner"
 import type { User } from "@supabase/supabase-js"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { Language } from "@/lib/translations"
 
 // Local storage keys
 const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
 export default function SettingsPage() {
+  const { t, language, setLanguage } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -25,6 +29,7 @@ export default function SettingsPage() {
   // Form state
   const [batteryCapacity, setBatteryCapacity] = useState("")
   const [homeRate, setHomeRate] = useState("")
+  const [currency, setCurrency] = useState("JPY")
 
   const supabase = createClient()
 
@@ -40,14 +45,17 @@ export default function SettingsPage() {
         if (profile) {
           setBatteryCapacity(profile.battery_capacity?.toString() ?? "")
           setHomeRate(profile.home_rate?.toString() ?? "")
+          setCurrency(profile.currency || "JPY")
         }
       } else {
         // Load from local storage
         const savedBattery = localStorage.getItem(LOCAL_STORAGE_BATTERY)
         const savedRate = localStorage.getItem(LOCAL_STORAGE_RATE)
+        const savedCurrency = getLocalCurrency()
         
         if (savedBattery) setBatteryCapacity(savedBattery)
         if (savedRate) setHomeRate(savedRate)
+        if (savedCurrency) setCurrency(savedCurrency)
       }
       
       setLoading(false)
@@ -66,20 +74,22 @@ export default function SettingsPage() {
         const formData = new FormData()
         formData.append("batteryCapacity", batteryCapacity)
         formData.append("homeRate", homeRate)
+        formData.append("currency", currency)
         
         const result = await updateProfile(formData)
         if (result.error) throw new Error(result.error)
         
-        toast.success("Settings saved to your account")
+        toast.success(t('common.success'))
       } else {
         // Save to local storage
         localStorage.setItem(LOCAL_STORAGE_BATTERY, batteryCapacity)
         localStorage.setItem(LOCAL_STORAGE_RATE, homeRate)
+        setLocalCurrency(currency)
         
-        toast.success("Settings saved to this device")
+        toast.success(t('common.success'))
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to save settings")
+      toast.error(err.message || t('common.error'))
     } finally {
       setSaving(false)
     }
@@ -95,13 +105,13 @@ export default function SettingsPage() {
           }
 
           if (!sessions || sessions.length === 0) {
-              toast.error("No data to export")
+              toast.error(t('history.noData'))
               return
           }
 
           // CSV Headers
-          const headers = ["Date", "Cost (¥)", "Start %", "End %", "kWh", "Type"]
-          const rows = sessions.map(s => [
+          const headers = ["Date", `${t('common.cost')} (${currency})`, t('forms.startPercent'), t('forms.endPercent'), "kWh", t('forms.type')]
+          const rows = sessions.map((s: any) => [
               new Date(s.charged_at).toLocaleString(),
               s.cost,
               s.start_percent,
@@ -112,7 +122,7 @@ export default function SettingsPage() {
 
           const csvContent = [
               headers.join(","),
-              ...rows.map(row => row.join(","))
+              ...rows.map((row: any[]) => row.join(","))
           ].join("\n")
 
           const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
@@ -125,7 +135,7 @@ export default function SettingsPage() {
           document.body.removeChild(link)
       } catch (e) {
           console.error(e)
-          toast.error("Failed to export data")
+          toast.error(t('common.error'))
       }
   }
 
@@ -146,8 +156,38 @@ export default function SettingsPage() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold">Settings</h1>
+          <h1 className="text-xl font-bold">{t('settings.title')}</h1>
         </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Globe className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>{t('common.language')}</CardTitle>
+                <CardDescription>
+                  Select your preferred language
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+             <div className="space-y-2">
+                <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+                  <SelectTrigger id="language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="ja">日本語</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -156,17 +196,35 @@ export default function SettingsPage() {
                 <Car className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle>Vehicle Profile</CardTitle>
+                <CardTitle>{t('settings.vehicleProfile')}</CardTitle>
                 <CardDescription>
-                  Set your car's details for smart calculations
+                  {t('settings.vehicleProfileDesc')}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-4">
+              
               <div className="space-y-2">
-                <Label htmlFor="batteryCapacity">Battery Capacity (kWh)</Label>
+                <Label htmlFor="currency">{t('common.currency')}</Label>
+                <div className="relative">
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger id="currency">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="JPY">JPY (¥)</SelectItem>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="batteryCapacity">{t('settings.batteryCapacity')} (kWh)</Label>
                 <div className="relative">
                   <Input
                     id="batteryCapacity"
@@ -181,12 +239,12 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Used to calculate energy added from % change.
+                  {t('settings.batteryCapacityDesc')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="homeRate">Home Electricity Rate</Label>
+                <Label htmlFor="homeRate">{t('settings.homeRate')}</Label>
                 <div className="relative">
                   <Input
                     id="homeRate"
@@ -197,20 +255,20 @@ export default function SettingsPage() {
                     onChange={(e) => setHomeRate(e.target.value)}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    ¥/kWh
+                    /kWh
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Used to auto-calculate cost for home charging.
+                  {t('settings.homeRateDesc')}
                 </p>
               </div>
 
               <Button type="submit" className="w-full" disabled={saving}>
                 {saving ? (
-                  "Saving..."
+                  t('common.loading')
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" /> Save Settings
+                    <Save className="mr-2 h-4 w-4" /> {t('common.save')}
                   </>
                 )}
               </Button>
@@ -226,21 +284,21 @@ export default function SettingsPage() {
                         <Download className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle>Data Management</CardTitle>
-                        <CardDescription>Export your data</CardDescription>
+                        <CardTitle>{t('settings.dataManagement')}</CardTitle>
+                        <CardDescription>{t('settings.exportData')}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
             <CardContent>
                 <Button variant="outline" className="w-full" onClick={handleExport}>
-                    <Download className="mr-2 h-4 w-4" /> Export to CSV
+                    <Download className="mr-2 h-4 w-4" /> {t('settings.exportData')}
                 </Button>
             </CardContent>
         </Card>
 
         {!user && (
           <div className="text-center p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-            <p>Sign in to sync these settings across your devices.</p>
+            <p>{t('settings.signInToSync')}</p>
             <Link href="/auth/login" className="text-primary hover:underline mt-2 inline-block">
               Sign In
             </Link>

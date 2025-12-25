@@ -48,17 +48,28 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <meta name="theme-color" content="#3b82f6" />
       </head>
-      <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LanguageProvider>
+            {children}
+            <Toaster />
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

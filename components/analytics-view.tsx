@@ -25,6 +25,41 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
 const EXPENSE_COLORS = ["#FF8042", "#8884d8", "#82ca9d", "#ffc658", "#a4de6c"]
 
 export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
+  // Helpers
+  const formatCurrency = (amount: number, currency: string) => {
+    const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "¥"
+    return `${symbol}${amount.toLocaleString()}`
+  }
+  
+  // Note for Charting: Recharts doesn't handle mixed currencies well. 
+  // We will normalize everything to JPY for the chart height visualization if multiple exist, 
+  // OR just assume single currency for charts for now but label correctly if consistent.
+  // Actually, simplest approach for V1 multi-currency is:
+  // Charts just show raw numbers (mixed). 
+  // Tooltips show formatted value based on the dominant currency or just a generic symbol?
+  // Let's improve the total cards to show mixed sums.
+
+  // Helper to sum by currency
+  const sumByCurrency = (items: { amount: number, currency: string }[]) => {
+      return items.reduce((acc, item) => {
+          const curr = item.currency || "JPY"
+          acc[curr] = (acc[curr] || 0) + item.amount
+          return acc
+      }, {} as Record<string, number>)
+  }
+  
+  const chargingTotals = sumByCurrency(sessions.map(s => ({ amount: s.cost || 0, currency: s.currency || "JPY" })))
+  const expenseTotals = sumByCurrency(expenses.map(e => ({ amount: e.amount, currency: e.currency || "JPY" })))
+
+  const grandTotals: Record<string, number> = {}
+  Object.keys(chargingTotals).forEach(k => grandTotals[k] = (grandTotals[k] || 0) + chargingTotals[k])
+  Object.keys(expenseTotals).forEach(k => grandTotals[k] = (grandTotals[k] || 0) + expenseTotals[k])
+
+  const formatTotalString = (totals: Record<string, number>) => {
+      const parts = Object.entries(totals).map(([curr, amt]) => formatCurrency(amt, curr))
+      return parts.join(" + ") || "¥0"
+  }
+
   // Monthly Data Calculation
   const monthlyData = useMemo(() => {
     const data: Record<string, { charging: number; expenses: number; total: number }> = {}
@@ -86,9 +121,6 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
       return Object.entries(data).map(([name, value]) => ({ name, value }))
   }, [expenses])
 
-  const totalChargingCost = sessions.reduce((acc, s) => acc + (s.cost || 0), 0)
-  const totalExpensesCost = expenses.reduce((acc, e) => acc + e.amount, 0)
-  const grandTotal = totalChargingCost + totalExpensesCost
 
   if (sessions.length === 0 && expenses.length === 0) {
       return (
@@ -104,7 +136,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
         <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>Total Monthly Spending</CardTitle>
-            <CardDescription>Combined charging and maintenance costs</CardDescription>
+            <CardDescription>Combined charging and maintenance costs (nominal)</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
              <ResponsiveContainer width="100%" height="100%">
@@ -115,11 +147,11 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                     fontSize={12} 
                     tickLine={false} 
                     axisLine={false} 
-                    tickFormatter={(value) => `¥${value}`} 
+                    tickFormatter={(value) => `${value}`} 
                 />
                 <Tooltip 
                     cursor={{ fill: 'transparent' }}
-                    formatter={(value: number) => [`¥${value.toLocaleString()}`, 'Cost']}
+                    formatter={(value: number) => [`${value.toLocaleString()}`, 'Cost']}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
                 <Legend />
@@ -151,7 +183,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `¥${value.toLocaleString()}`} />
+                <Tooltip formatter={(value: number) => `${value.toLocaleString()}`} />
                 <Legend verticalAlign="bottom" height={36}/>
               </PieChart>
             </ResponsiveContainer>
@@ -180,7 +212,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                         <Cell key={`cell-${index}`} fill={EXPENSE_COLORS[index % EXPENSE_COLORS.length]} />
                     ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => `¥${value.toLocaleString()}`} />
+                    <Tooltip formatter={(value: number) => `${value.toLocaleString()}`} />
                     <Legend verticalAlign="bottom" height={36}/>
                 </PieChart>
                 </ResponsiveContainer>
@@ -200,7 +232,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
-                    ¥{grandTotal.toLocaleString()}
+                    {formatTotalString(grandTotals)}
                   </div>
                   <p className="text-xs text-muted-foreground">Charging + Expenses</p>
               </CardContent>
@@ -210,7 +242,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                   <CardTitle className="text-sm font-medium">Charging Total</CardTitle>
               </CardHeader>
               <CardContent>
-                  <div className="text-2xl font-bold">¥{totalChargingCost.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{formatTotalString(chargingTotals)}</div>
                   <p className="text-xs text-muted-foreground">{sessions.length} sessions</p>
               </CardContent>
           </Card>
@@ -220,7 +252,7 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
-                    ¥{totalExpensesCost.toLocaleString()}
+                    {formatTotalString(expenseTotals)}
                   </div>
                   <p className="text-xs text-muted-foreground">{expenses.length} records</p>
               </CardContent>

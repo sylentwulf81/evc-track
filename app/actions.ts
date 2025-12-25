@@ -29,11 +29,16 @@ export async function addChargingSession(formData: FormData) {
     return { error: "Not authenticated" }
   }
 
+  // Get user profile for currency, default to JPY
+  const { data: profile } = await supabase.from("profiles").select("currency").eq("id", user.id).single()
+  const currency = profile?.currency || "JPY"
+
   const { error } = await supabase.from("charging_sessions").insert({
     cost,
     start_percent: startPercent,
     end_percent: endPercent,
     user_id: user.id,
+    currency,
   })
 
   if (error) {
@@ -101,10 +106,13 @@ export async function updateProfile(formData: FormData) {
     ? Number.parseFloat(formData.get("homeRate") as string)
     : null
 
+  const currency = formData.get("currency") as string || "JPY"
+
   const { error } = await supabase.from("profiles").upsert({
     id: user.id,
     battery_capacity: batteryCapacity,
     home_rate: homeRate,
+    currency,
     updated_at: new Date().toISOString(),
   })
 
@@ -135,6 +143,10 @@ export async function addVehicleExpense(data: {
     return { error: "Not authenticated" }
   }
 
+  // Get user profile for currency, default to JPY
+  const { data: profile } = await supabase.from("profiles").select("currency").eq("id", user.id).single()
+  const currency = profile?.currency || "JPY"
+
   const { error } = await supabase.from("vehicle_expenses").insert({
     title: data.title,
     amount: data.amount,
@@ -144,6 +156,7 @@ export async function addVehicleExpense(data: {
     odometer: data.odometer,
     location: data.location,
     user_id: user.id,
+    currency,
   })
 
   if (error) {

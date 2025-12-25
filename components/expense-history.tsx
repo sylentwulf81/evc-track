@@ -11,7 +11,10 @@ type MonthlyData = {
   expenses: VehicleExpense[]
 }
 
+import { useLanguage } from "@/contexts/LanguageContext"
+
 export function ExpenseHistory({ expenses }: { expenses: VehicleExpense[] }) {
+  const { t } = useLanguage()
   const groupedByMonth = expenses.reduce(
     (acc, expense) => {
       const date = new Date(expense.expense_date)
@@ -40,8 +43,24 @@ export function ExpenseHistory({ expenses }: { expenses: VehicleExpense[] }) {
     }))
     .sort((a, b) => new Date(b.expenses[0].expense_date).getTime() - new Date(a.expenses[0].expense_date).getTime())
 
-  const yearTotal = expenses.reduce((sum, e) => sum + e.amount, 0)
+  // Calculate year totals by currency
+  const yearTotals = expenses.reduce((acc, e) => {
+      const currency = e.currency || "JPY"
+      acc[currency] = (acc[currency] || 0) + e.amount
+      return acc
+  }, {} as Record<string, number>)
+  
   const currentYear = new Date().getFullYear()
+
+  const formatCurrency = (amount: number, currency: string) => {
+      const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "¥"
+      return `${symbol}${amount.toLocaleString()}`
+  }
+
+  // Format year total string
+  const totalString = Object.entries(yearTotals)
+      .map(([curr, amount]) => formatCurrency(amount, curr))
+      .join(" + ") || "¥0"
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -81,67 +100,80 @@ export function ExpenseHistory({ expenses }: { expenses: VehicleExpense[] }) {
             <div className="p-2 rounded-lg bg-orange-500/10">
               <Wrench className="h-5 w-5" />
             </div>
-            {currentYear} Total Expenses
+            {currentYear} {t('history.total')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
-            ¥{yearTotal.toLocaleString()}
+            {totalString}
           </div>
           <p className="text-sm text-muted-foreground mt-1">{expenses.length} records</p>
         </CardContent>
       </Card>
 
       <div className="space-y-4">
-        {monthlyData.map((month) => (
-          <Card key={month.month} className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold">{month.month}</CardTitle>
-                <span className="text-xl font-bold text-muted-foreground">¥{month.total.toLocaleString()}</span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {month.expenses.map((expense) => (
-                  <div
-                    key={expense.id}
-                    className="flex items-center justify-between p-4 bg-card/50 border border-border/50 rounded-xl hover:bg-accent/5 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 flex-1 overflow-hidden">
-                      <div className={`p-2 rounded-lg border ${getCategoryColor(expense.category)} bg-opacity-20`}>
-                        {getCategoryIcon(expense.category)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{expense.title}</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(expense.expense_date), "MMM d")}
-                          </span>
-                          {expense.odometer && (
-                            <span className="flex items-center gap-1">
-                                <span className="text-xs">Dashboard:</span> {expense.odometer.toLocaleString()} km
-                            </span>
-                          )}
-                           {expense.location && (
-                            <span className="flex items-center gap-1 truncate max-w-[120px]">
-                                <MapPin className="h-3 w-3" />
-                                {expense.location}
-                            </span>
-                          )}
+        {monthlyData.map((month) => {
+            // Calculate monthly total per currency
+           const monthTotals = month.expenses.reduce((acc, e) => {
+                const currency = e.currency || "JPY"
+                acc[currency] = (acc[currency] || 0) + e.amount
+                return acc
+            }, {} as Record<string, number>)
+            
+            const monthTotalString = Object.entries(monthTotals)
+                .map(([curr, amount]) => formatCurrency(amount, curr))
+                .join(" + ")
+
+            return (
+              <Card key={month.month} className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold">{month.month}</CardTitle>
+                    <span className="text-sm sm:text-lg font-bold text-muted-foreground">{monthTotalString}</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {month.expenses.map((expense) => (
+                      <div
+                        key={expense.id}
+                        className="flex items-center justify-between p-4 bg-card/50 border border-border/50 rounded-xl hover:bg-accent/5 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                          <div className={`p-2 rounded-lg border ${getCategoryColor(expense.category)} bg-opacity-20`}>
+                            {getCategoryIcon(expense.category)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{expense.title}</div>
+                            <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {format(new Date(expense.expense_date), "MMM d")}
+                              </span>
+                              {expense.odometer && (
+                                <span className="flex items-center gap-1">
+                                    <span className="text-xs">Dashboard:</span> {expense.odometer.toLocaleString()} km
+                                </span>
+                              )}
+                              {expense.location && (
+                                <span className="flex items-center gap-1 truncate max-w-[120px]">
+                                    <MapPin className="h-3 w-3" />
+                                    {expense.location}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="font-bold text-lg text-foreground ml-2 whitespace-nowrap">
+                            {formatCurrency(expense.amount, expense.currency || "JPY")}
                         </div>
                       </div>
-                    </div>
-                    <div className="font-bold text-lg text-foreground ml-2 whitespace-nowrap">
-                        ¥{expense.amount.toLocaleString()}
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardContent>
+              </Card>
+            )
+        })}
       </div>
 
        {expenses.length === 0 && (
