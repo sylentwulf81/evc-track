@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench } from "lucide-react"
+import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
