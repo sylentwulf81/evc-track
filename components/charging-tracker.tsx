@@ -7,6 +7,7 @@ import { ChargingHistory } from "@/components/charging-history"
 import { AnalyticsView } from "@/components/analytics-view"
 import { AddChargeDialog } from "@/components/add-charge-dialog"
 import { EditSessionDialog } from "@/components/edit-session-dialog"
+import { SessionDetailsDialog } from "@/components/session-details-dialog"
 import {
   getLocalSessions,
   addLocalSession,
@@ -66,11 +67,11 @@ export function ChargingTracker() {
   }, [loading, user, loadSessions])
 
   const handleAddSession = async (data: {
-    cost: number
+    cost: number | null
     startPercent: number
-    endPercent: number
-    kwh?: number
-    chargeType?: "fast" | "standard"
+    endPercent: number | null
+    kwh?: number | null
+    chargeType?: "fast" | "standard" | null
   }) => {
     if (user) {
       // Save to Supabase
@@ -103,9 +104,9 @@ export function ChargingTracker() {
   const handleEditSession = async (
     id: string,
     updates: {
-      cost: number
+      cost: number | null
       start_percent: number
-      end_percent: number
+      end_percent: number | null
       kwh?: number | null
       charge_type?: "fast" | "standard" | null
       charged_at: string
@@ -144,8 +145,15 @@ export function ChargingTracker() {
     }
   }
 
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  
   const handleSessionClick = (session: ChargingSession) => {
     setSelectedSession(session)
+    setDetailsDialogOpen(true)
+  }
+
+  const handleEditClick = (session: ChargingSession) => {
+    setDetailsDialogOpen(false)
     setEditDialogOpen(true)
   }
 
@@ -229,6 +237,14 @@ export function ChargingTracker() {
         )}
       </main>
       {!showAnalytics && <AddChargeDialog onAdd={handleAddSession} user={user} />}
+      
+      <SessionDetailsDialog
+        session={selectedSession}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onEdit={handleEditClick}
+      />
+
       <EditSessionDialog
         session={selectedSession}
         open={editDialogOpen}

@@ -14,18 +14,20 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Home, Zap } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Plus, Home, Zap, Battery, BatteryFull, Plug } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getProfile } from "@/app/actions"
 import type { User } from "@supabase/supabase-js"
+import { toast } from "sonner"
 
 interface AddChargeDialogProps {
   onAdd: (data: {
-    cost: number
+    cost: number | null
     startPercent: number
-    endPercent: number
-    kwh?: number
-    chargeType?: "fast" | "standard"
+    endPercent: number | null
+    kwh?: number | null
+    chargeType?: "fast" | "standard" | null
   }) => Promise<{ error?: string }>
   user: User | null
 }
@@ -36,18 +38,18 @@ const LOCAL_STORAGE_RATE = "evc_home_rate"
 
 export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   // Form State
   const [cost, setCost] = useState("")
   const [startPercent, setStartPercent] = useState("")
   const [endPercent, setEndPercent] = useState("")
-  const [kwh, setKwh] = useState("")
-  const [chargeType, setChargeType] = useState<"fast" | "standard" | "">("")
+  const [kwhAdded, setKwhAdded] = useState("")
+  const [chargeType, setChargeType] = useState<"fast" | "standard" | null>("standard")
   
   // Smart Logic State
-  const [isHomeCharge, setIsHomeCharge] = useState(false)
+  const [useHomeCharge, setUseHomeCharge] = useState(false)
   const [batteryCapacity, setBatteryCapacity] = useState<number | null>(null)
   const [homeRate, setHomeRate] = useState<number | null>(null)
 
@@ -91,44 +93,71 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
         const percentDiff = (end - start) / 100
         const calculatedKwh = percentDiff * batteryCapacity
         // Only auto-fill if kwh is empty or seems calculated match
-        setKwh(calculatedKwh.toFixed(2))
+        setKwhAdded(calculatedKwh.toFixed(2))
 
         // Calculate Cost if Home Charge
-        if (isHomeCharge && homeRate) {
+        if (useHomeCharge && homeRate) {
            const calculatedCost = calculatedKwh * homeRate
            setCost(Math.round(calculatedCost).toString())
         }
       }
+    } else if (!startPercent || !endPercent || !batteryCapacity) {
+        setKwhAdded(""); // Clear kwhAdded if inputs are incomplete
+        if (useHomeCharge) setCost(""); // Clear cost if home charge is active and inputs are incomplete
     }
-  }, [startPercent, endPercent, batteryCapacity, isHomeCharge, homeRate])
+  }, [startPercent, endPercent, batteryCapacity, useHomeCharge, homeRate]) // Changed to useHomeCharge
 
   // Auto-set charge type when toggling home charge
   useEffect(() => {
-    if (isHomeCharge) {
+    if (useHomeCharge) { // Changed to useHomeCharge
       setChargeType("standard")
     }
-  }, [isHomeCharge])
+  }, [useHomeCharge]) // Changed to useHomeCharge
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) { // Changed to async function
     e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    setLoading(true)
 
-    const result = await onAdd({
-      cost: Number(cost),
-      startPercent: Number(startPercent),
-      endPercent: Number(endPercent),
-      kwh: kwh ? Number(kwh) : undefined,
-      chargeType: chargeType || undefined,
+    // Only startPercent is mandatory
+    if (!startPercent) {
+        toast.error("Please enter a starting percentage")
+        setLoading(false)
+        return
+    }
+
+    const start = Number.parseFloat(startPercent)
+    const end = endPercent ? Number.parseFloat(endPercent) : null
+    const costVal = cost ? Number.parseFloat(cost) : null
+
+    // Helper for validation only if value is provided
+    if (start < 0 || start > 100) {
+      toast.error("Start percentage must be between 0 and 100")
+      setLoading(false)
+      return
+    }
+    
+    if (end !== null && (end < 0 || end > 100)) {
+        toast.error("End percentage must be between 0 and 100")
+        setLoading(false)
+        return
+    }
+
+    const res = await onAdd({
+      cost: costVal,
+      startPercent: start,
+      endPercent: end,
+      kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined, // Changed to kwhAdded
+      chargeType: chargeType, // Passed directly
     })
 
-    setIsLoading(false)
+    setLoading(false)
 
-    if (result.error) {
-      setError(result.error)
+    if (res.error) {
+      toast.error(res.error)
     } else {
+      toast.success("Charging session added")
       setOpen(false)
-      resetForm()
+      resetForm() // Use resetForm
     }
   }
 
@@ -136,9 +165,9 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
     setCost("")
     setStartPercent("")
     setEndPercent("")
-    setKwh("")
-    setChargeType("")
-    setIsHomeCharge(false)
+    setKwhAdded("") // Changed to kwhAdded
+    setChargeType("standard") // Default to standard
+    setUseHomeCharge(false) // Changed to useHomeCharge
   }
 
   return (
@@ -147,139 +176,148 @@ export function AddChargeDialog({ onAdd, user }: AddChargeDialogProps) {
         if (!val) resetForm()
     }}>
       <DialogTrigger asChild>
-        <Button
-          size="lg"
-          className="rounded-full h-16 w-16 fixed bottom-6 left-6 shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-all hover:scale-110 z-50"
-        >
-          <Plus className="h-7 w-7" />
-          <span className="sr-only">Add charge</span>
+        <Button className="rounded-full h-14 w-14 shadow-lg fixed bottom-6 left-6 z-50 p-0 hover:scale-105 transition-transform">
+          <Plus className="h-8 w-8" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl">Add Charging Session</DialogTitle>
-          <DialogDescription>Enter the details of your charging session</DialogDescription>
+          <DialogTitle>Add Charging Session</DialogTitle>
+          <DialogDescription>
+            Enter the details of your charging session.
+          </DialogDescription>
         </DialogHeader>
-        
-        {/* Home Charge Toggle */}
-        {(homeRate || batteryCapacity) && (
-            <div className="bg-primary/5 p-3 rounded-lg flex items-center justify-between cursor-pointer border border-primary/10" onClick={() => setIsHomeCharge(!isHomeCharge)}>
-                <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-full ${isHomeCharge ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        <Home className="h-4 w-4" />
-                    </div>
-                    <div>
-                        <div className="font-medium text-sm">Home Charge</div>
-                        <div className="text-xs text-muted-foreground">Auto-calculate using {homeRate ? `¥${homeRate}/kWh` : 'saved settings'}</div>
-                    </div>
-                </div>
-                <div className={`w-10 h-6 rounded-full transition-colors relative ${isHomeCharge ? 'bg-primary' : 'bg-muted'}`}>
-                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isHomeCharge ? 'left-5' : 'left-1'}`} />
-                </div>
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+          
+          {/* Home Charge Toggle */}
+          {(homeRate || batteryCapacity) && ( // Only show if relevant data exists
+            <div className="flex items-center justify-between border p-3 rounded-lg bg-muted/20">
+              <div className="flex items-center gap-2">
+                  <div className={`p-2 rounded-full ${useHomeCharge ? 'bg-primary/20' : 'bg-muted'}`}>
+                      <Home className={`h-4 w-4 ${useHomeCharge ? 'text-primary' : 'text-muted-foreground'}`} />
+                  </div>
+                  <div className="flex flex-col">
+                      <span className="text-sm font-medium">Home Charge</span>
+                      <span className="text-[10px] text-muted-foreground">Auto-calc cost</span>
+                  </div>
+              </div>
+              <Switch checked={useHomeCharge} onCheckedChange={setUseHomeCharge} />
             </div>
-        )}
+          )}
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="startPercent">Start %</Label>
-                <Input 
-                    id="startPercent" 
-                    type="number" 
-                    placeholder="20" 
-                    required 
-                    min="0" 
-                    max="100"
-                    value={startPercent}
-                    onChange={(e) => setStartPercent(e.target.value)}
+            <div className="grid gap-2">
+              <Label htmlFor="start">Start % <span className="text-destructive">*</span></Label>
+              <div className="relative">
+                <Input
+                  id="start"
+                  type="number"
+                  placeholder="0"
+                  value={startPercent}
+                  onChange={(e) => setStartPercent(e.target.value)}
+                  className="pl-8"
+                  required
                 />
+                <Battery className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
-            <div className="space-y-2">
-                <Label htmlFor="endPercent">End %</Label>
-                <Input 
-                    id="endPercent" 
-                    type="number" 
-                    placeholder="80" 
-                    required 
-                    min="0" 
-                    max="100"
-                    value={endPercent}
-                    onChange={(e) => setEndPercent(e.target.value)}
+            <div className="grid gap-2">
+              <Label htmlFor="end">End % <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
+              <div className="relative">
+                <Input
+                  id="end"
+                  type="number"
+                  placeholder="80"
+                  value={endPercent}
+                  onChange={(e) => setEndPercent(e.target.value)}
+                  className="pl-8"
                 />
+                <BatteryFull className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cost">Cost (¥)</Label>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="cost">Cost (¥) <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
             <div className="relative">
-                <Input 
-                    id="cost" 
-                    type="number" 
-                    placeholder="500" 
-                    required 
-                    min="0"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    className={isHomeCharge ? "border-primary/50 bg-primary/5" : ""}
-                />
-                 {isHomeCharge && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        <span>Auto</span>
-                    </div>
-                 )}
+              <Input
+                id="cost"
+                type="number"
+                placeholder="0"
+                value={cost}
+                onChange={(e) => setCost(e.target.value)}
+                className={`pl-8 ${useHomeCharge ? 'border-primary/50 bg-primary/5' : ''}`}
+                readOnly={useHomeCharge}
+              />
+              <span className="absolute left-3 top-2.5 font-bold text-muted-foreground">¥</span>
+              {useHomeCharge && (
+                  <span className="absolute right-3 top-2.5 text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                      Auto
+                  </span>
+              )}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kwh">
-              Energy (kWh) <span className="text-muted-foreground text-xs">(optional)</span>
-            </Label>
-             <div className="relative">
-                <Input 
-                    id="kwh" 
-                    type="number" 
-                    step="0.01" 
-                    placeholder="25.5" 
-                    min="0"
-                    value={kwh}
-                    onChange={(e) => setKwh(e.target.value)}
-                />
-                 {batteryCapacity && startPercent && endPercent && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                        {batteryCapacity}kWh Battery
+          {!useHomeCharge && (
+            <div className="grid gap-2">
+                <Label>Charge Type</Label>
+                <div className="grid grid-cols-2 gap-2">
+                <Button
+                    type="button"
+                    variant={chargeType === "fast" ? "default" : "outline"}
+                    className="flex items-center gap-2 h-auto py-3"
+                    onClick={() => setChargeType("fast")}
+                >
+                    <Zap className="h-4 w-4" />
+                    <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold">Fast</span>
+                    {/* <span className="text-[10px] opacity-80">Supercharger</span> */}
                     </div>
-                 )}
+                </Button>
+                <Button
+                    type="button"
+                    variant={chargeType === "standard" ? "default" : "outline"}
+                    className="flex items-center gap-2 h-auto py-3"
+                    onClick={() => setChargeType("standard")}
+                >
+                    <Plug className="h-4 w-4" />
+                    <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold">Standard</span>
+                    {/* <span className="text-[10px] opacity-80">Home / L2</span> */}
+                    </div>
+                </Button>
+                </div>
             </div>
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="chargeType">
-              Charge Type <span className="text-muted-foreground text-xs">(optional)</span>
-            </Label>
-            <Select value={chargeType} onValueChange={(value) => setChargeType(value as "fast" | "standard")}>
-              <SelectTrigger id="chargeType">
-                <SelectValue placeholder="Select charge type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fast">Fast Charge</SelectItem>
-                <SelectItem value="standard">Standard Charge</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* New Read-only Info Section */}
+          {(batteryCapacity || kwhAdded || (useHomeCharge && homeRate)) && ( // Adjusted condition to use state variables
+              <div className="mt-2 p-3 bg-muted/30 rounded-lg text-xs space-y-1 text-muted-foreground">
+                  {batteryCapacity && (
+                       <div className="flex justify-between">
+                         <span>Vehicle Battery:</span>
+                         <span className="font-medium">{batteryCapacity} kWh</span>
+                       </div>
+                  )}
+                  {kwhAdded && (
+                      <div className="flex justify-between">
+                        <span>Energy Added:</span>
+                        <span className="font-medium text-foreground">{Number(kwhAdded).toFixed(1)} kWh</span>
+                      </div>
+                  )}
+                   {useHomeCharge && homeRate && (
+                      <div className="flex justify-between">
+                        <span>Home Rate:</span>
+                        <span className="font-medium">{homeRate} ¥/kWh</span>
+                      </div>
+                  )}
+              </div>
+          )}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => {
-                setOpen(false)
-                resetForm()
-            }}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading} className="min-w-[120px]">
-              {isLoading ? "Adding..." : "Add Session"}
-            </Button>
-          </div>
+
+          <Button type="submit" disabled={loading} className="w-full mt-2">
+            {loading ? "Adding..." : "Add Session"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

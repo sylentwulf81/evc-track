@@ -4,16 +4,20 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function addChargingSession(formData: FormData) {
-  const cost = Number.parseInt(formData.get("cost") as string)
+  const cost = formData.get("cost") ? Number.parseInt(formData.get("cost") as string) : null
   const startPercent = Number.parseInt(formData.get("startPercent") as string)
-  const endPercent = Number.parseInt(formData.get("endPercent") as string)
+  const endPercent = formData.get("endPercent") ? Number.parseInt(formData.get("endPercent") as string) : null
 
-  if (isNaN(cost) || isNaN(startPercent) || isNaN(endPercent)) {
-    return { error: "Invalid input" }
+  if (isNaN(startPercent)) {
+    return { error: "Start percentage is required" }
   }
 
-  if (startPercent < 0 || startPercent > 100 || endPercent < 0 || endPercent > 100) {
-    return { error: "Percentages must be between 0 and 100" }
+  if (startPercent < 0 || startPercent > 100) {
+    return { error: "Start percentage must be between 0 and 100" }
+  }
+
+  if (endPercent !== null && (endPercent < 0 || endPercent > 100)) {
+    return { error: "End percentage must be between 0 and 100" }
   }
 
   const supabase = await createClient()

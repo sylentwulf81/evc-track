@@ -1,9 +1,9 @@
 // Client-side storage utilities for guest users
 export interface ChargingSession {
   id: string
-  cost: number
+  cost: number | null
   start_percent: number
-  end_percent: number
+  end_percent: number | null
   charged_at: string
   user_id: string | null
   kwh?: number | null

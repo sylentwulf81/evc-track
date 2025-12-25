@@ -33,7 +33,7 @@ export function AnalyticsView({ sessions }: AnalyticsViewProps) {
        const date = parseISO(session.charged_at)
        const monthKey = format(date, "MMM yyyy")
        
-       data[monthKey] = (data[monthKey] || 0) + session.cost
+       data[monthKey] = (data[monthKey] || 0) + (session.cost || 0)
     })
 
     return Object.entries(data)
@@ -54,7 +54,7 @@ export function AnalyticsView({ sessions }: AnalyticsViewProps) {
   const sortedMonthlyData = useMemo(() => {
       const grouped = sessions.reduce((acc, session) => {
           const month = format(parseISO(session.charged_at), "yyyy-MM")
-          acc[month] = (acc[month] || 0) + session.cost
+          acc[month] = (acc[month] || 0) + (session.cost || 0)
           return acc
       }, {} as Record<string, number>)
 
@@ -77,9 +77,10 @@ export function AnalyticsView({ sessions }: AnalyticsViewProps) {
       ]
 
       sessions.forEach(s => {
-          if (s.charge_type === "fast") data[0].value += s.cost
-          else if (s.charge_type === "standard") data[1].value += s.cost
-          else data[2].value += s.cost
+          const cost = s.cost || 0
+          if (s.charge_type === "fast") data[0].value += cost
+          else if (s.charge_type === "standard") data[1].value += cost
+          else data[2].value += cost
       })
 
       return data.filter(d => d.value > 0)
@@ -159,7 +160,7 @@ export function AnalyticsView({ sessions }: AnalyticsViewProps) {
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
-                    ¥{sessions.reduce((acc, s) => acc + s.cost, 0).toLocaleString()}
+                    ¥{sessions.reduce((acc, s) => acc + (s.cost || 0), 0).toLocaleString()}
                   </div>
                   <p className="text-xs text-muted-foreground">Lifetime total</p>
               </CardContent>
@@ -179,7 +180,7 @@ export function AnalyticsView({ sessions }: AnalyticsViewProps) {
               </CardHeader>
               <CardContent>
                   <div className="text-2xl font-bold">
-                    ¥{Math.round(sessions.reduce((acc, s) => acc + s.cost, 0) / sessions.length || 0).toLocaleString()}
+                    ¥{Math.round(sessions.reduce((acc, s) => acc + (s.cost || 0), 0) / sessions.length || 0).toLocaleString()}
                   </div>
                   <p className="text-xs text-muted-foreground">Per charge</p>
               </CardContent>

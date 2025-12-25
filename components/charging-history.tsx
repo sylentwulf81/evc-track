@@ -4,15 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { format } from "date-fns"
 import { Battery, Calendar, TrendingUp, Zap } from "lucide-react"
 
-type ChargingSession = {
-  id: string
-  cost: number
-  start_percent: number
-  end_percent: number
-  charged_at: string
-  kwh?: number | null
-  charge_type?: "fast" | "standard" | null
-}
+import type { ChargingSession } from "@/lib/storage"
 
 type MonthlyData = {
   month: string
@@ -40,7 +32,7 @@ export function ChargingHistory({
         }
       }
 
-      acc[monthKey].total += session.cost
+      acc[monthKey].total += session.cost || 0
       acc[monthKey].sessions.push(session)
 
       return acc
@@ -55,7 +47,7 @@ export function ChargingHistory({
     }))
     .sort((a, b) => new Date(b.sessions[0].charged_at).getTime() - new Date(a.sessions[0].charged_at).getTime())
 
-  const yearTotal = sessions.reduce((sum, s) => sum + s.cost, 0)
+  const yearTotal = sessions.reduce((sum, s) => sum + (s.cost || 0), 0)
   const currentYear = new Date().getFullYear()
 
   return (
@@ -105,7 +97,7 @@ export function ChargingHistory({
                       <div className="flex-1">
                         <div className="font-medium flex items-center gap-2 flex-wrap">
                           <span className="text-foreground">
-                            {session.start_percent}% → {session.end_percent}%
+                            {session.start_percent}% → {session.end_percent !== null ? `${session.end_percent}%` : '...'}
                           </span>
                           {session.charge_type && (
                             <span
@@ -134,7 +126,9 @@ export function ChargingHistory({
                         </div>
                       </div>
                     </div>
-                    <div className="font-bold text-lg text-foreground ml-2">¥{session.cost.toLocaleString()}</div>
+                    <div className="font-bold text-lg text-foreground ml-2">
+                        {session.cost !== null ? `¥${session.cost.toLocaleString()}` : <span className="text-muted-foreground text-sm font-normal">Active</span>}
+                    </div>
                   </div>
                 ))}
               </div>
