@@ -136,10 +136,10 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1 md:col-span-2">
+        <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>{t('analytics.monthlySpending')}</CardTitle>
-            <CardDescription>{t('analytics.combinedCosts')}</CardDescription>
+            <CardTitle>{t('history.chargingHistory')}</CardTitle>
+            <CardDescription>{t('analytics.monthlySpending')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
              <ResponsiveContainer width="100%" height="100%">
@@ -154,12 +154,37 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
                 />
                 <Tooltip 
                     cursor={{ fill: 'transparent' }}
-                    formatter={(value: number) => [`${value.toLocaleString()}`, 'Cost']}
+                    formatter={(value: number) => [`${value.toLocaleString()}`, t('forms.cost')]}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
-                <Legend />
-                <Bar dataKey="charging" name={t('nav.charging')} stackId="a" fill="#4f7cff" radius={[0, 0, 4, 4]} />
-                <Bar dataKey="expenses" name={t('nav.expenses')} stackId="a" fill="#ff8042" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="charging" name={t('nav.charging')} fill="#4f7cff" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>{t('history.expenseHistory')}</CardTitle>
+            <CardDescription>{t('analytics.monthlySpending')}</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+             <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={(value) => `${value}`} 
+                />
+                <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    formatter={(value: number) => [`${value.toLocaleString()}`, t('forms.cost')]}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                />
+                <Bar dataKey="expenses" name={t('nav.expenses')} fill="#ff8042" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

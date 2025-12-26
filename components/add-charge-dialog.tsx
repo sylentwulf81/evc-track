@@ -19,6 +19,7 @@ import { Plus, Home, Zap, Battery, BatteryFull, Plug } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getProfile } from "@/app/actions"
 import type { User } from "@supabase/supabase-js"
+import type { ChargingSession } from "@/lib/storage"
 import { toast } from "sonner"
 import { useLanguage } from "@/contexts/LanguageContext"
 
@@ -28,7 +29,7 @@ interface AddChargeDialogProps {
     startPercent: number
     endPercent: number | null
     kwh?: number | null
-    chargeType?: "fast" | "standard" | null
+    chargeType?: ChargingSession['charge_type']
   }) => Promise<{ error?: string }>
   user: User | null
   trigger?: React.ReactNode
@@ -48,7 +49,7 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
   const [startPercent, setStartPercent] = useState("")
   const [endPercent, setEndPercent] = useState("")
   const [kwhAdded, setKwhAdded] = useState("")
-  const [chargeType, setChargeType] = useState<"fast" | "standard" | null>("standard")
+  const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>("standard")
   
   // Smart Logic State
   const [useHomeCharge, setUseHomeCharge] = useState(false)
@@ -265,30 +266,20 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
           {!useHomeCharge && (
             <div className="grid gap-2">
                 <Label>{t('tracker.chargeType')}</Label>
-                <div className="grid grid-cols-2 gap-2">
-                <Button
-                    type="button"
-                    variant={chargeType === "fast" ? "default" : "outline"}
-                    className="flex items-center gap-2 h-auto py-3"
-                    onClick={() => setChargeType("fast")}
-                >
-                    <Zap className="h-4 w-4" />
-                    <div className="flex flex-col items-start">
-                    <span className="text-sm font-semibold">{t('tracker.fast')}</span>
-                    </div>
-                </Button>
-                <Button
-                    type="button"
-                    variant={chargeType === "standard" ? "default" : "outline"}
-                    className="flex items-center gap-2 h-auto py-3"
-                    onClick={() => setChargeType("standard")}
-                >
-                    <Plug className="h-4 w-4" />
-                    <div className="flex flex-col items-start">
-                    <span className="text-sm font-semibold">{t('tracker.standard')}</span>
-                    </div>
-                </Button>
-                </div>
+                <Select value={chargeType || "standard"} onValueChange={(val: any) => setChargeType(val)}>
+                    <SelectTrigger className="h-11">
+                        <SelectValue placeholder={t('tracker.chargeType')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="level1">{t('tracker.level1') || "Level 1 (120V)"}</SelectItem>
+                        <SelectItem value="level2">{t('tracker.level2') || "Level 2 (240V)"}</SelectItem>
+                        <SelectItem value="chademo">{t('tracker.chademo') || "CHAdeMO"}</SelectItem>
+                        <SelectItem value="ccs">{t('tracker.ccs') || "CCS"}</SelectItem>
+                        <SelectItem value="tesla">{t('tracker.tesla') || "Tesla Supercharger"}</SelectItem>
+                        <SelectItem value="type2">{t('tracker.type2') || "Type 2"}</SelectItem>
+                        <SelectItem value="standard">{t('tracker.standardStandard') || "Standard"}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
           )}
 

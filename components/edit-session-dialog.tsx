@@ -40,7 +40,7 @@ interface EditSessionDialogProps {
       start_percent: number
       end_percent: number | null
       kwh?: number | null
-      charge_type?: "fast" | "standard" | null
+      charge_type?: ChargingSession['charge_type']
       charged_at: string
     },
   ) => Promise<{ error?: string }>
@@ -58,7 +58,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
   const [startPercent, setStartPercent] = useState("")
   const [endPercent, setEndPercent] = useState("")
   const [kwh, setKwh] = useState<string>("")
-  const [chargeType, setChargeType] = useState<"fast" | "standard" | null>(null)
+  const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>(null)
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
 
@@ -202,12 +202,18 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
               <Label htmlFor="edit-chargeType">
                 {t('tracker.chargeType')} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span>
               </Label>
-              <Select value={chargeType || ""} onValueChange={(value: "fast" | "standard") => setChargeType(value)}>
+              <Select value={chargeType || ""} onValueChange={(value: string) => setChargeType(value as ChargingSession['charge_type'])}>
                 <SelectTrigger id="edit-chargeType" className="h-11">
                   <SelectValue placeholder="Select charge type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fast">{t('tracker.fastFast') || "Fast Charge"}</SelectItem>
+                  <SelectItem value="level1">{t('tracker.level1') || "Level 1 (120V)"}</SelectItem>
+                  <SelectItem value="level2">{t('tracker.level2') || "Level 2 (240V)"}</SelectItem>
+                  <SelectItem value="chademo">{t('tracker.chademo') || "CHAdeMO"}</SelectItem>
+                  <SelectItem value="ccs">{t('tracker.ccs') || "CCS"}</SelectItem>
+                  <SelectItem value="tesla">{t('tracker.tesla') || "Tesla Supercharger"}</SelectItem>
+                  <SelectItem value="type2">{t('tracker.type2') || "Type 2"}</SelectItem>
+                  <SelectItem value="fast">{t('tracker.fastFast') || "Fast Charge (Legacy)"}</SelectItem>
                   <SelectItem value="standard">{t('tracker.standardStandard') || "Standard Charge"}</SelectItem>
                 </SelectContent>
               </Select>

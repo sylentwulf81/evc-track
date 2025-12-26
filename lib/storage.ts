@@ -7,7 +7,7 @@ export interface ChargingSession {
   charged_at: string
   user_id: string | null
   kwh?: number | null
-  charge_type?: "fast" | "standard" | null
+  charge_type?: "level1" | "level2" | "chademo" | "ccs" | "tesla" | "type2" | "fast" | "standard" | null
   currency: string
 }
 

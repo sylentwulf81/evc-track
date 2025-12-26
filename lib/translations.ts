@@ -60,6 +60,13 @@ export type TranslationKeys = {
         standardStandard: string
         deleteConfirm: string
         deleteWarning: string
+        totalGained: string
+        level1: string
+        level2: string
+        chademo: string
+        ccs: string
+        tesla: string
+        type2: string
     }
     history: {
         total: string
@@ -194,6 +201,13 @@ export const translations: Record<Language, TranslationKeys> = {
             standardStandard: "Standard Charge",
             deleteConfirm: "Delete charging session?",
             deleteWarning: "This action cannot be undone. This will permanently delete this charging session.",
+            totalGained: "Total Gained",
+            level1: "Level 1 (120V)",
+            level2: "Level 2 (240V)",
+            chademo: "CHAdeMO",
+            ccs: "CCS",
+            tesla: "Tesla Supercharger",
+            type2: "Type 2",
         },
         history: {
             total: "Total",
@@ -326,6 +340,13 @@ export const translations: Record<Language, TranslationKeys> = {
             standardStandard: "Carga Estándar",
             deleteConfirm: "¿Eliminar sesión de carga?",
             deleteWarning: "Esta acción no se puede deshacer. Eliminará permanentemente esta sesión.",
+            totalGained: "Total Ganado",
+            level1: "Nivel 1 (120V)",
+            level2: "Nivel 2 (240V)",
+            chademo: "CHAdeMO",
+            ccs: "CCS",
+            tesla: "Supercargador Tesla",
+            type2: "Tipo 2",
         },
         history: {
             total: "Total",
@@ -458,6 +479,13 @@ export const translations: Record<Language, TranslationKeys> = {
             standardStandard: "普通充電",
             deleteConfirm: "セッションを削除しますか？",
             deleteWarning: "この操作は取り消せません。この充電セッションは完全に削除されます。",
+            totalGained: "充電量",
+            level1: "レベル1 (100V)",
+            level2: "レベル2 (200V)",
+            chademo: "CHAdeMO",
+            ccs: "CCS",
+            tesla: "テスラ スーパーチャージャー",
+            type2: "Type 2",
         },
         history: {
             total: "合計",

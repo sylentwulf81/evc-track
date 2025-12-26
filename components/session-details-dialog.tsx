@@ -81,10 +81,15 @@ export function SessionDetailsDialog({
                     <div className="p-2.5 bg-blue-500/10 rounded-full text-blue-600 dark:text-blue-400">
                         <Battery className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                         <div className="text-sm text-muted-foreground">{t('forms.chargingProgress') || "Charging Progress"}</div>
-                        <div className="font-medium">
-                            {session.start_percent}% → {session.end_percent !== null ? `${session.end_percent}%` : '...'}
+                        <div className="font-medium flex items-center gap-2">
+                            <span>{session.start_percent}% → {session.end_percent !== null ? `${session.end_percent}%` : '...'}</span>
+                            {session.end_percent !== null && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 font-medium">
+                                    +{session.end_percent - session.start_percent}%
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -96,7 +101,7 @@ export function SessionDetailsDialog({
                     <div>
                         <div className="text-sm text-muted-foreground">{t('tracker.chargeType')}</div>
                         <div className="font-medium capitalize">
-                            {session.charge_type === 'fast' ? t('tracker.fast') : t('tracker.standard')}
+                            {session.charge_type ? t(`tracker.${session.charge_type}`) : '—'}
                         </div>
                     </div>
                 </div>
