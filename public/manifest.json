@@ -1,7 +1,8 @@
 {
   "name": "EVC Track",
   "short_name": "EVC Track",
-  "description": "Track your EV charging costs and history",
+  "id": "/",
+  "description": "Smart EV charging cost tracker and analytics",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0d1a",

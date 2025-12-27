@@ -42,6 +42,7 @@ interface EditSessionDialogProps {
       kwh?: number | null
       charge_type?: ChargingSession['charge_type']
       charged_at: string
+      odometer?: number | null
     },
   ) => Promise<{ error?: string }>
   onDelete: (id: string) => Promise<{ error?: string }>
@@ -58,6 +59,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
   const [startPercent, setStartPercent] = useState("")
   const [endPercent, setEndPercent] = useState("")
   const [kwh, setKwh] = useState<string>("")
+  const [odometer, setOdometer] = useState("")
   const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>(null)
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
@@ -69,6 +71,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       setStartPercent(session.start_percent.toString())
       setEndPercent(session.end_percent !== null ? session.end_percent.toString() : "")
       setKwh(session.kwh?.toString() || "")
+      setOdometer(session.odometer ? session.odometer.toString() : "")
       setChargeType(session.charge_type || null)
 
       const chargedDate = new Date(session.charged_at)
@@ -94,6 +97,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       kwh: kwh ? Number.parseFloat(kwh) : null,
       charge_type: chargeType || null,
       charged_at: chargedAt,
+      odometer: odometer ? Number.parseFloat(odometer) : null,
     })
 
     setIsLoading(false)
@@ -169,17 +173,30 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
                 </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-cost">{t('forms.cost')} (¥)</Label>
-              <Input
-                id="edit-cost"
-                type="number"
-                value={cost}
-                onChange={(e) => setCost(e.target.value)}
-                min="0"
-                placeholder={t('common.optional') || "Optional"}
-                className="h-11"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-cost">{t('forms.cost')} (¥)</Label>
+                <Input
+                  id="edit-cost"
+                  type="number"
+                  value={cost}
+                  onChange={(e) => setCost(e.target.value)}
+                  min="0"
+                  placeholder={t('common.optional') || "Optional"}
+                  className="h-11"
+                />
+              </div>
+               <div className="space-y-2">
+                <Label htmlFor="edit-odometer">{t('forms.odometer')} (km)</Label>
+                 <Input
+                  id="edit-odometer"
+                  type="number"
+                  value={odometer}
+                  onChange={(e) => setOdometer(e.target.value)}
+                  placeholder={t('common.optional') || "Optional"}
+                  className="h-11"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

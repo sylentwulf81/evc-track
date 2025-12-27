@@ -9,6 +9,7 @@ export interface ChargingSession {
   kwh?: number | null
   charge_type?: "level1" | "level2" | "chademo" | "ccs" | "tesla" | "type2" | "fast" | "standard" | null
   currency: string
+  odometer?: number | null
 }
 
 

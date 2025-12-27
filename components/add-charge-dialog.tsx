@@ -30,6 +30,7 @@ interface AddChargeDialogProps {
     endPercent: number | null
     kwh?: number | null
     chargeType?: ChargingSession['charge_type']
+    odometer?: number | null
   }) => Promise<{ error?: string }>
   user: User | null
   trigger?: React.ReactNode
@@ -49,6 +50,7 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
   const [startPercent, setStartPercent] = useState("")
   const [endPercent, setEndPercent] = useState("")
   const [kwhAdded, setKwhAdded] = useState("")
+  const [odometer, setOdometer] = useState("")
   const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>("standard")
   
   // Smart Logic State
@@ -131,6 +133,7 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
     const start = Number.parseFloat(startPercent)
     const end = endPercent ? Number.parseFloat(endPercent) : null
     const costVal = cost ? Number.parseFloat(cost) : null
+    const odoVal = odometer ? Number.parseFloat(odometer) : null
 
     // Helper for validation only if value is provided
     if (start < 0 || start > 100) {
@@ -151,6 +154,7 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
       endPercent: end,
       kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined,
       chargeType: chargeType,
+      odometer: odoVal,
     })
 
     setLoading(false)
@@ -169,6 +173,7 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
     setStartPercent("")
     setEndPercent("")
     setKwhAdded("")
+    setOdometer("")
     setChargeType("standard")
     setUseHomeCharge(false)
   }
@@ -260,6 +265,21 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
                       Auto
                   </span>
               )}
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="odometer">{t('forms.odometer')} (km) <span className="text-xs text-muted-foreground font-normal">({t('common.optional')})</span></Label>
+            <div className="relative">
+              <Input
+                id="odometer"
+                type="number"
+                placeholder="e.g. 15000"
+                value={odometer}
+                onChange={(e) => setOdometer(e.target.value)}
+                className="pl-8"
+              />
+              <div className="absolute left-3 top-3 h-4 w-4 text-muted-foreground opacity-50 text-xs font-bold">Km</div>
             </div>
           </div>
 

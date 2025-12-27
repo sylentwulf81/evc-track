@@ -105,6 +105,20 @@ export function SessionDetailsDialog({
                         </div>
                     </div>
                 </div>
+            
+                {session.odometer && (
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-purple-500/10 rounded-full text-purple-600 dark:text-purple-400">
+                             <span className="font-bold text-xs">KM</span>
+                        </div>
+                        <div>
+                            <div className="text-sm text-muted-foreground">{t('forms.odometer')}</div>
+                            <div className="font-medium">
+                                {session.odometer.toLocaleString()} km
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex gap-3 pt-2">

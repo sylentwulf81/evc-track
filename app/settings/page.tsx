@@ -302,8 +302,15 @@ export default function SettingsPage() {
             <Link href="/auth/login" className="text-primary hover:underline mt-2 inline-block">
               Sign In
             </Link>
+            <Link href="/auth/login" className="text-primary hover:underline mt-2 inline-block">
+              Sign In
+            </Link>
           </div>
         )}
+
+        <div className="text-center text-xs text-muted-foreground/50 pt-4 pb-8">
+            {t('settings.version')} v1.1.0
+        </div>
       </div>
     </div>
   )

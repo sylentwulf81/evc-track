@@ -87,6 +87,7 @@ export type TranslationKeys = {
         exportData: string
         guestMode: string
         signInToSync: string
+        version: string
     }
     forms: {
         date: string
@@ -228,6 +229,7 @@ export const translations: Record<Language, TranslationKeys> = {
             exportData: "Export to CSV",
             guestMode: "Guest Mode",
             signInToSync: "Sign in to sync these settings across your devices.",
+            version: "App Version",
         },
         forms: {
             date: "Date",
@@ -367,6 +369,7 @@ export const translations: Record<Language, TranslationKeys> = {
             exportData: "Exportar a CSV",
             guestMode: "Modo Invitado",
             signInToSync: "Inicia sesión para sincronizar estos ajustes.",
+            version: "Versión de la App",
         },
         forms: {
             date: "Fecha",
@@ -506,6 +509,7 @@ export const translations: Record<Language, TranslationKeys> = {
             exportData: "CSVエクスポート",
             guestMode: "ゲストモード",
             signInToSync: "設定を同期するにはログインしてください。",
+            version: "アプリバージョン",
         },
         forms: {
             date: "日付",
