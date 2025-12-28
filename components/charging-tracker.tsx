@@ -241,7 +241,8 @@ export function ChargingTracker() {
 
       <main className="container max-w-md mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <Tabs defaultValue="tracker" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
+          {/* Desktop Top Nav */}
+          <TabsList className="hidden md:grid w-full grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
             <TabsTrigger value="tracker" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
               {t('nav.charging')}
             </TabsTrigger>
@@ -253,7 +254,7 @@ export function ChargingTracker() {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="tracker" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="tracker" className="space-y-6 focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
              <div className="flex items-center justify-between">
                  <h2 className="text-lg font-semibold tracking-tight">{t('history.chargingHistory')}</h2>
                  <div className="hidden md:block">
@@ -277,12 +278,8 @@ export function ChargingTracker() {
                 <AddChargeDialog 
                     onAdd={handleAddSession} 
                     user={user} 
-                    // No trigger prop uses default FAB styling if we restore it, BUT 
-                    // we removed fixed positioning from default in AddChargeDialog.
-                    // So we must pass a FAB trigger here explicitly or restore fixed in default?
-                    // Let's pass a FAB trigger explicitly for mobile.
                     trigger={
-                        <Button className="rounded-full h-14 w-14 shadow-lg fixed bottom-6 right-6 z-50 p-0 hover:scale-105 transition-transform">
+                        <Button className="rounded-full h-14 w-14 shadow-lg fixed bottom-24 right-6 z-50 p-0 hover:scale-105 transition-transform">
                              <Plus className="h-8 w-8" />
                         </Button>
                     }
@@ -290,7 +287,7 @@ export function ChargingTracker() {
              </div>
           </TabsContent>
 
-          <TabsContent value="expenses" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="expenses" className="space-y-6 focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
              <div className="flex items-center justify-between">
                  <h2 className="text-lg font-semibold tracking-tight">{t('history.expenseHistory')}</h2>
                   <div className="hidden md:block">
@@ -312,7 +309,7 @@ export function ChargingTracker() {
                     onAdd={handleAddExpense} 
                     user={user} 
                     trigger={
-                        <Button className="h-14 w-14 rounded-full shadow-lg fixed bottom-6 right-6 z-50 p-0 bg-orange-500 hover:bg-orange-600 transition-transform hover:scale-105">
+                        <Button className="h-14 w-14 rounded-full shadow-lg fixed bottom-24 right-6 z-50 p-0 bg-orange-500 hover:bg-orange-600 transition-transform hover:scale-105">
                             <Wrench className="h-6 w-6" />
                         </Button>
                     }
@@ -320,9 +317,34 @@ export function ChargingTracker() {
              </div>
           </TabsContent>
 
-          <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
             <AnalyticsView sessions={sessions} expenses={expenses} />
           </TabsContent>
+
+          {/* Mobile Bottom Nav */}
+          <TabsList className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-lg border-t grid grid-cols-3 gap-1 p-2 pb-6 z-40 rounded-none shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+            <TabsTrigger 
+                value="tracker" 
+                className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
+            >
+                <Zap className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{t('nav.charging')}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+                value="expenses" 
+                className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
+            >
+                <Wrench className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{t('nav.expenses')}</span>
+            </TabsTrigger>
+             <TabsTrigger 
+                value="analytics" 
+                className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
+            >
+                <BarChart3 className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{t('nav.analytics')}</span>
+            </TabsTrigger>
+          </TabsList>
         </Tabs>
       </main>
 
