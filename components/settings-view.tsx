@@ -45,6 +45,26 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [manualAvatar, setManualAvatar] = useState<string | null>(null)
   const [openAvatarDialog, setOpenAvatarDialog] = useState(false)
 
+  // Cute car avatars list
+  const carAvatars = [
+    { id: "sedan", name: "Classic Sedan", path: "/assets/avatars/sedan.png" },
+    { id: "suv", name: "Adventure SUV", path: "/assets/avatars/suv.png" },
+    { id: "truck", name: "Tough Truck", path: "/assets/avatars/truck.png" },
+    { id: "hatchback", name: "Sporty Hatch", path: "/assets/avatars/hatchback.png" },
+    { id: "red-racer", name: "Red Racer", path: "/assets/avatars/red-racer.png" },
+    { id: "blue-cruiser", name: "Blue Cruiser", path: "/assets/avatars/blue-cruiser.png" },
+    { id: "yellow-speedster", name: "Yellow Speedster", path: "/assets/avatars/yellow-speedster.png" },
+    { id: "green-eco", name: "Green Eco", path: "/assets/avatars/green-eco.png" },
+    { id: "purple-star", name: "Purple Star", path: "/assets/avatars/purple-star.png" },
+    { id: "orange-fire", name: "Orange Fire", path: "/assets/avatars/orange-fire.png" },
+    { id: "pink-dream", name: "Pink Dream", path: "/assets/avatars/pink-dream.png" },
+    { id: "teal-wind", name: "Teal Wind", path: "/assets/avatars/teal-wind.png" },
+    { id: "silver-flash", name: "Silver Flash", path: "/assets/avatars/silver-flash.png" },
+    { id: "black-night", name: "Black Night", path: "/assets/avatars/black-night.png" },
+    { id: "white-cloud", name: "White Cloud", path: "/assets/avatars/white-cloud.png" },
+    { id: "neon-streak", name: "Neon Streak", path: "/assets/avatars/neon-streak.png" },
+  ]
+
   // Group EVs by Make
   const groupedEVs = EV_DATABASE.reduce((acc, ev) => {
       if (!acc[ev.make]) acc[ev.make] = []
@@ -297,21 +317,51 @@ export function SettingsView({ user }: SettingsViewProps) {
                   </div>
                   
                   <Dialog open={openAvatarDialog} onOpenChange={setOpenAvatarDialog}>
-                      <DialogContent className="sm:max-w-md">
-                          <div className="grid grid-cols-2 gap-4 p-4">
-                              {["sedan", "suv", "truck", "hatchback"].map((type) => (
-                                  <div 
-                                    key={type} 
-                                    className="cursor-pointer hover:bg-accent rounded-lg p-4 flex flex-col items-center gap-2 border-2 border-transparent hover:border-primary/50 transition-all"
-                                    onClick={() => {
-                                        setManualAvatar(`/assets/avatars/${type}.png`)
-                                        setOpenAvatarDialog(false)
-                                    }}
-                                  >
-                                      <img src={`/assets/avatars/${type}.png`} alt={type} className="h-20 w-20 object-contain" />
-                                      <span className="capitalize text-sm font-medium">{type}</span>
+                      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col p-0">
+                          <div className="p-4 border-b">
+                            <h2 className="text-lg font-semibold">Choose Your Car Avatar</h2>
+                            <p className="text-sm text-muted-foreground mt-1">Select a cute car to represent your vehicle</p>
+                          </div>
+                          <div className="flex-1 overflow-y-auto p-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                              {carAvatars.map((avatar) => (
+                                <div 
+                                  key={avatar.id}
+                                  className={cn(
+                                    "cursor-pointer hover:bg-accent rounded-lg p-3 flex flex-col items-center gap-2 border-2 transition-all",
+                                    manualAvatar === avatar.path
+                                      ? "border-primary bg-primary/10"
+                                      : "border-transparent hover:border-primary/50"
+                                  )}
+                                  onClick={() => {
+                                    setManualAvatar(avatar.path)
+                                    setSelectedEvId("") // Clear EV selection when manual avatar is chosen
+                                    setOpenAvatarDialog(false)
+                                  }}
+                                >
+                                  <div className="relative">
+                                    <img 
+                                      src={avatar.path} 
+                                      alt={avatar.name} 
+                                      className="h-16 w-16 object-contain"
+                                      onError={(e) => {
+                                        // Fallback to sedan if image doesn't exist yet
+                                        const target = e.target as HTMLImageElement
+                                        if (target.src !== `${window.location.origin}/assets/avatars/sedan.png`) {
+                                          target.src = "/assets/avatars/sedan.png"
+                                        }
+                                      }}
+                                    />
+                                    {manualAvatar === avatar.path && (
+                                      <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                                        <Check className="h-3 w-3" />
+                                      </div>
+                                    )}
                                   </div>
+                                  <span className="text-xs font-medium text-center">{avatar.name}</span>
+                                </div>
                               ))}
+                            </div>
                           </div>
                       </DialogContent>
                   </Dialog>
