@@ -88,6 +88,10 @@ export type TranslationKeys = {
         guestMode: string
         signInToSync: string
         version: string
+        selectEv: string
+        searchEv: string
+        selectVehicle: string
+        noVehicleFound: string
     }
     forms: {
         date: string
@@ -225,6 +229,10 @@ export const translations: Record<Language, TranslationKeys> = {
             batteryCapacityDesc: "Used to calculate energy added from % change",
             homeRate: "Home Electricity Rate",
             homeRateDesc: "Used to auto-calculate cost for home charging",
+            selectEv: "Select Popular EV",
+            searchEv: "Search vehicle...",
+            selectVehicle: "Select vehicle",
+            noVehicleFound: "No vehicle found.",
             dataManagement: "Data Management",
             exportData: "Export to CSV",
             guestMode: "Guest Mode",

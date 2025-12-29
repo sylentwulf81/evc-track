@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Save, Car, Zap, Download, Globe } from "lucide-react"
+import { Save, Car, Download, Globe, LogIn } from "lucide-react"
 import Link from "next/link"
 import { updateProfile, getProfile, getChargingSessions } from "@/app/actions"
 import { getLocalSessions, getLocalCurrency, setLocalCurrency } from "@/lib/storage"
@@ -37,7 +37,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
-export default function SettingsPage() {
+export function SettingsView() {
   const { t, language, setLanguage } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -167,27 +167,12 @@ export default function SettingsPage() {
           toast.error(t('common.error'))
       }
   }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Zap className="h-8 w-8 animate-pulse text-primary" />
-      </div>
-    )
-  }
+  
+  // NOTE: Loading state is handled by parent or just empty render for now if needed, 
+  // but let's keep it simple and just show form even if loading prefs (defaults will update)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4 pb-24">
-      <div className="container max-w-lg mx-auto space-y-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Link href="/">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-bold">{t('settings.title')}</h1>
-        </div>
-
+    <div className="space-y-6 pb-20 md:pb-0">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
@@ -282,9 +267,6 @@ export default function SettingsPage() {
                   </Select>
                 </div>
               </div>
-
-
-
 
               <div className="space-y-4">
                   <div className="space-y-2 flex flex-col">
@@ -414,23 +396,20 @@ export default function SettingsPage() {
                 </Button>
             </CardContent>
         </Card>
-
+        
         {!user && (
           <div className="text-center p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-            <p>{t('settings.signInToSync')}</p>
-            <Link href="/auth/login" className="text-primary hover:underline mt-2 inline-block">
-              Sign In
-            </Link>
-            <Link href="/auth/login" className="text-primary hover:underline mt-2 inline-block">
-              Sign In
-            </Link>
+             <div className="flex flex-col items-center gap-2">
+                 <p>{t('settings.signInToSync')}</p>
+                 <Link href="/auth/login" className="w-full">
+                     <Button variant="outline" className="w-full gap-2">
+                         <LogIn className="h-4 w-4" />
+                         Sign In
+                     </Button>
+                  </Link>
+             </div>
           </div>
         )}
-
-        <div className="text-center text-xs text-muted-foreground/50 pt-4 pb-8">
-            {t('settings.version')} v1.1.0
-        </div>
-      </div>
     </div>
   )
 }

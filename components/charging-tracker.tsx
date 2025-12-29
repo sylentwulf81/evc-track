@@ -23,6 +23,7 @@ import { EditSessionDialog } from "@/components/edit-session-dialog"
 import { SessionDetailsDialog } from "@/components/session-details-dialog"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
 import { ExpenseHistory } from "@/components/expense-history"
+import { SettingsView } from "@/components/settings-view"
 import {
   getLocalSessions,
   addLocalSession,
@@ -218,31 +219,14 @@ export function ChargingTracker() {
             <h1 className="text-xl font-bold tracking-tight">EVC Track</h1>
           </div>
           
-          <div className="flex items-center gap-2">
-             <Link href="/settings">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </Link>
-             {user ? (
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full">
-                  <LogOut className="h-5 w-5" />
-                </Button>
-              ) : (
-                 <Link href="/auth/login">
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <LogIn className="h-5 w-5" />
-                  </Button>
-                </Link>
-              )}
-          </div>
+
         </div>
       </header>
 
       <main className="container md:max-w-5xl lg:max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <Tabs defaultValue="tracker" value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Desktop Top Nav */}
-          <TabsList className="hidden md:grid w-full max-w-md mx-auto grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
+          <TabsList className="hidden md:grid w-full max-w-lg mx-auto grid-cols-4 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
             <TabsTrigger value="tracker" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
               {t('nav.charging')}
             </TabsTrigger>
@@ -251,6 +235,9 @@ export function ChargingTracker() {
             </TabsTrigger>
             <TabsTrigger value="analytics" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
               {t('nav.analytics')}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
+              {t('settings.title')}
             </TabsTrigger>
           </TabsList>
           
@@ -320,9 +307,21 @@ export function ChargingTracker() {
           <TabsContent value="analytics" className="focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
             <AnalyticsView sessions={sessions} expenses={expenses} />
           </TabsContent>
+          
+          <TabsContent value="settings" className="focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
+             <SettingsView />
+             {user && (
+                <div className="mt-8 flex justify-center pb-8">
+                     <Button variant="destructive" onClick={handleLogout} className="w-full max-w-sm gap-2">
+                        <LogOut className="h-4 w-4" />
+                        Log Out
+                     </Button>
+                </div>
+             )}
+          </TabsContent>
 
           {/* Mobile Bottom Nav */}
-          <TabsList className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-lg border-t grid grid-cols-3 gap-1 p-2 pb-6 z-40 rounded-none shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+          <TabsList className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-lg border-t grid grid-cols-4 gap-1 p-2 pb-6 z-40 rounded-none shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
             <TabsTrigger 
                 value="tracker" 
                 className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
@@ -337,12 +336,19 @@ export function ChargingTracker() {
                 <Wrench className="h-5 w-5" />
                 <span className="text-[10px] font-medium">{t('nav.expenses')}</span>
             </TabsTrigger>
-             <TabsTrigger 
+            <TabsTrigger 
                 value="analytics" 
                 className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
             >
                 <BarChart3 className="h-5 w-5" />
                 <span className="text-[10px] font-medium">{t('nav.analytics')}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+                value="settings" 
+                className="flex flex-col gap-1 h-auto py-2 rounded-xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all"
+            >
+                <Settings className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{t('settings.title')}</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
