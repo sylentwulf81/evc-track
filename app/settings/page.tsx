@@ -223,24 +223,66 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="batteryCapacity">{t('settings.batteryCapacity')} (kWh)</Label>
-                <div className="relative">
-                  <Input
-                    id="batteryCapacity"
-                    type="number"
-                    step="0.1"
-                    placeholder="e.g. 75.0"
-                    value={batteryCapacity}
-                    onChange={(e) => setBatteryCapacity(e.target.value)}
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    kWh
+
+              <div className="space-y-4">
+                  <div className="space-y-2">
+                      <Label>{t('settings.selectEv') || "Select Popular EV"}</Label>
+                      <Select onValueChange={(val) => {
+                          if (val) setBatteryCapacity(val)
+                      }}>
+                          <SelectTrigger>
+                              <SelectValue placeholder="Select a vehicle..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="57.5">Tesla Model 3 RWD (LFP)</SelectItem>
+                              <SelectItem value="75.0">Tesla Model 3 Long Range / Perf</SelectItem>
+                              <SelectItem value="60.0">Tesla Model Y RWD</SelectItem>
+                              <SelectItem value="75.0">Tesla Model Y Long Range / Perf</SelectItem>
+                              <SelectItem value="100.0">Tesla Model S/X Long Range</SelectItem>
+                              <SelectItem value="40.0">Nissan Leaf (40 kWh)</SelectItem>
+                              <SelectItem value="62.0">Nissan Leaf e+ (62 kWh)</SelectItem>
+                              <SelectItem value="66.0">Chevrolet Bolt EV/EUV</SelectItem>
+                              <SelectItem value="77.4">Hyundai Ioniq 5 (Long Range)</SelectItem>
+                              <SelectItem value="58.0">Hyundai Ioniq 5 (Standard Range)</SelectItem>
+                              <SelectItem value="77.4">Kia EV6 (Long Range)</SelectItem>
+                              <SelectItem value="58.0">Kia EV6 (Standard Range)</SelectItem>
+                              <SelectItem value="82.0">Volkswagen ID.4 (Pro)</SelectItem>
+                              <SelectItem value="62.0">Volkswagen ID.4 (Standard)</SelectItem>
+                              <SelectItem value="72.8">Toyota bZ4X (FWD)</SelectItem>
+                              <SelectItem value="91.0">Ford Mustang Mach-E (Ext Range)</SelectItem>
+                              <SelectItem value="72.0">Ford Mustang Mach-E (Std Range)</SelectItem>
+                              <SelectItem value="131.0">Ford F-150 Lightning (Ext Range)</SelectItem>
+                              <SelectItem value="98.0">Ford F-150 Lightning (Std Range)</SelectItem>
+                              <SelectItem value="87.0">Nissan Ariya (87 kWh)</SelectItem>
+                              <SelectItem value="63.0">Nissan Ariya (63 kWh)</SelectItem>
+                              <SelectItem value="105.0">BMW iX xDrive50</SelectItem>
+                              <SelectItem value="80.7">BMW i4 eDrive40</SelectItem>
+                              <SelectItem value="83.9">Rivian R1T/R1S (Standard)</SelectItem>
+                              <SelectItem value="135.0">Rivian R1T/R1S (Large)</SelectItem>
+                          </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">Selecting a vehicle only auto-fills the battery capacity below.</p>
                   </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('settings.batteryCapacityDesc')}
-                </p>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="batteryCapacity">{t('settings.batteryCapacity')} (kWh)</Label>
+                    <div className="relative">
+                      <Input
+                        id="batteryCapacity"
+                        type="number"
+                        step="0.1"
+                        placeholder="e.g. 75.0"
+                        value={batteryCapacity}
+                        onChange={(e) => setBatteryCapacity(e.target.value)}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        kWh
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t('settings.batteryCapacityDesc')}
+                    </p>
+                  </div>
               </div>
 
               <div className="space-y-2">

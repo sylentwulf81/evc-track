@@ -138,13 +138,23 @@ export function ChargingHistory({
                               {session.charge_type && (
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 ${
-                                    session.charge_type === "fast"
+                                    session.charge_type === "fast" || session.charge_type === "tesla" || session.charge_type === "chademo" || session.charge_type === "ccs"
                                       ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-400 border border-orange-200 dark:border-orange-900"
                                       : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900"
                                   }`}
                                 >
-                                  {session.charge_type === "fast" && <Zap className="h-3 w-3" />}
-                                  {session.charge_type === "fast" ? t('forms.fast') : t('forms.standard')}
+                                  {(session.charge_type === "fast" || session.charge_type === "tesla" || session.charge_type === "chademo" || session.charge_type === "ccs") && <Zap className="h-3 w-3" />}
+                                  {
+                                      session.charge_type === "fast" ? t('forms.fast') :
+                                      session.charge_type === "standard" ? t('forms.standard') :
+                                      session.charge_type === "level1" ? (t('tracker.level1') || "Level 1") :
+                                      session.charge_type === "level2" ? (t('tracker.level2') || "Level 2") :
+                                      session.charge_type === "chademo" ? (t('tracker.chademo') || "CHAdeMO") :
+                                      session.charge_type === "ccs" ? (t('tracker.ccs') || "CCS") :
+                                      session.charge_type === "tesla" ? (t('tracker.tesla') || "Tesla") :
+                                      session.charge_type === "type2" ? (t('tracker.type2') || "Type 2") :
+                                      t('forms.standard')
+                                  }
                                 </span>
                               )}
                             </div>
