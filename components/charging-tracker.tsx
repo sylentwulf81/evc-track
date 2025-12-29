@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus, User as UserIcon, Play, Square } from "lucide-react"
+import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus, User as UserIcon, Play, Square, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -49,6 +49,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ActiveSessionTimer } from "@/components/active-session-timer"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export function ChargingTracker() {
   const { t } = useLanguage()
@@ -67,6 +77,7 @@ export function ChargingTracker() {
   // Active Session State
   const [activeSession, setActiveSession] = useState<ChargingSession | null>(null)
   const [startSessionDialogOpen, setStartSessionDialogOpen] = useState(false) // Re-using AddDialog for "Complete"
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   // Sync tab with URL
   useEffect(() => {
@@ -166,6 +177,27 @@ export function ChargingTracker() {
         status: 'active'
       })
       setActiveSession(newSession)
+    }
+  }
+
+  const handleCancelSession = async () => {
+    if (!activeSession) return
+
+    if (user) {
+      // Delete from Supabase
+      const { error } = await supabase.from("charging_sessions").delete().eq('id', activeSession.id)
+
+      if (!error) {
+        setActiveSession(null)
+        // Refresh list
+        const { data: sessionData } = await supabase.from("charging_sessions").select("*").neq('status', 'active').order("charged_at", { ascending: false })
+        setSessions(sessionData || [])
+      }
+    } else {
+      // Delete from localStorage
+      deleteLocalSession(activeSession.id)
+      setActiveSession(null)
+      setSessions(getLocalSessions().filter(s => s.status !== 'active'))
     }
   }
 
@@ -444,19 +476,29 @@ export function ChargingTracker() {
                       </div>
                       <p className="text-xs text-muted-foreground">Started at {new Date(activeSession.session_start || activeSession.charged_at).toLocaleTimeString()}</p>
                     </div>
-                    <AddChargeDialog
-                      onAdd={handleCompleteSession}
-                      user={user}
-                      initialData={{
-                        startPercent: activeSession.start_percent,
-                        startTime: activeSession.session_start || activeSession.charged_at
-                      }}
-                      trigger={
-                        <Button size="lg" className="rounded-full h-16 w-16 shadow-lg bg-destructive hover:bg-destructive/90 p-0 hover:scale-105 transition-transform">
-                          <Square className="h-6 w-6 fill-current" />
-                        </Button>
-                      }
-                    />
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="lg" 
+                        variant="outline"
+                        className="rounded-full h-12 w-12 shadow-lg p-0 hover:scale-105 transition-transform border-destructive/50 hover:border-destructive hover:bg-destructive/10"
+                        onClick={() => setShowCancelDialog(true)}
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                      <AddChargeDialog
+                        onAdd={handleCompleteSession}
+                        user={user}
+                        initialData={{
+                          startPercent: activeSession.start_percent,
+                          startTime: activeSession.session_start || activeSession.charged_at
+                        }}
+                        trigger={
+                          <Button size="lg" className="rounded-full h-12 w-12 shadow-lg bg-primary hover:bg-primary/90 p-0 hover:scale-105 transition-transform">
+                            <Square className="h-5 w-5 fill-current" />
+                          </Button>
+                        }
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -588,6 +630,29 @@ export function ChargingTracker() {
         onSave={handleEditSession}
         onDelete={handleDeleteSession}
       />
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Active Session?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the active charging session. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Session</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleCancelSession()
+                setShowCancelDialog(false)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Cancel Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
