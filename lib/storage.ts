@@ -5,6 +5,8 @@ export interface ChargingSession {
   start_percent: number
   end_percent: number | null
   charged_at: string
+  session_start?: string | null
+  status: "active" | "completed"
   user_id: string | null
   kwh?: number | null
   charge_type?: "level1" | "level2" | "chademo" | "ccs" | "tesla" | "type2" | "fast" | "standard" | null
@@ -42,13 +44,19 @@ export function setLocalCurrency(currency: string): void {
 export function getLocalSessions(): ChargingSession[] {
   if (typeof window === "undefined") return []
   const data = localStorage.getItem(STORAGE_KEY)
-  return data ? JSON.parse(data) : []
+  const sessions = data ? JSON.parse(data) : []
+  // Backfill status for old sessions if missing
+  return sessions.map((s: any) => ({
+      ...s,
+      status: s.status || 'completed'
+  }))
 }
 
-export function addLocalSession(session: Omit<ChargingSession, "id" | "charged_at" | "user_id" | "currency">): ChargingSession {
+export function addLocalSession(session: Omit<ChargingSession, "id" | "charged_at" | "user_id" | "currency" | "status"> & { status?: "active" | "completed" }): ChargingSession {
   const sessions = getLocalSessions()
   const currency = getLocalCurrency()
   const newSession: ChargingSession = {
+    status: "completed", // default
     ...session,
     id: crypto.randomUUID(),
     charged_at: new Date().toISOString(),
