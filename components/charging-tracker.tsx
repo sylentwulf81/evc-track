@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -60,7 +60,7 @@ export function ChargingTracker() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [activeTab, setActiveTab] = useState("tracker")
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   // Sync tab with URL
   useEffect(() => {
