@@ -84,6 +84,27 @@ export function ChargingTracker() {
     router.replace(`?${params.toString()}`)
   }
 
+  useEffect(() => {
+    // Check auth state
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+    }
+    checkUser()
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
   // Load data when user or loading state changes
   useEffect(() => {
     if (loading) return
