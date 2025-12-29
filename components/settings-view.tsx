@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Save, Car, Download, Globe, LogIn } from "lucide-react"
+import { Save, Car, Download, Globe, LogIn, Moon, Sun, Laptop, Zap, Flower2 } from "lucide-react"
 import Link from "next/link"
 import { updateProfile, getProfile, getChargingSessions } from "@/app/actions"
 import { getLocalSessions, getLocalCurrency, setLocalCurrency } from "@/lib/storage"
 import { toast } from "sonner"
+import { useTheme } from "next-themes"
 import type { User } from "@supabase/supabase-js"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { Language } from "@/lib/translations"
@@ -38,6 +39,7 @@ const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
 export function SettingsView() {
+  const { theme, setTheme } = useTheme()
   const { t, language, setLanguage } = useLanguage()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -51,6 +53,7 @@ export function SettingsView() {
   const [openCombobox, setOpenCombobox] = useState(false)
   
   const [selectedEvId, setSelectedEvId] = useState("")
+  const [manualAvatar, setManualAvatar] = useState<string | null>(null)
   const [openAvatarDialog, setOpenAvatarDialog] = useState(false)
 
   // Group EVs by Make
@@ -205,16 +208,77 @@ export function SettingsView() {
 
         <Card>
           <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Sun className="h-5 w-5 text-primary rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 text-primary rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </div>
+              <div>
+                <CardTitle>{t('common.theme') || "Appearance"}</CardTitle>
+                <CardDescription>
+                  {t('settings.themeDesc') || "Select your preferred theme"}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                <Button 
+                    variant={theme === "light" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("light")}
+                >
+                   <Sun className="h-4 w-4" />
+                   <span className="text-xs">Light</span>
+                </Button>
+                <Button 
+                    variant={theme === "dark" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("dark")}
+                >
+                   <Moon className="h-4 w-4" />
+                   <span className="text-xs">Dark</span>
+                </Button>
+                <Button 
+                    variant={theme === "system" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("system")}
+                >
+                   <Laptop className="h-4 w-4" />
+                   <span className="text-xs">System</span>
+                </Button>
+                <Button 
+                    variant={theme === "charge" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("charge")}
+                >
+                   <Zap className="h-4 w-4" />
+                   <span className="text-xs">Charge</span>
+                </Button>
+                <Button 
+                    variant={theme === "sakura" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("sakura")}
+                >
+                   <Flower2 className="h-4 w-4" />
+                   <span className="text-xs">Sakura</span>
+                </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="relative group">
                   <div className="p-2 bg-primary/10 rounded-full cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => setOpenAvatarDialog(true)}>
-                    {selectedEvId ? (
-                         <img 
-                            src={EV_DATABASE.find(e => e.id === selectedEvId)?.image || "/assets/avatars/sedan.png"} 
-                            alt="Vehicle Avatar" 
-                            className="h-10 w-10 object-contain"
-                         />
-                    ) : (
+                     {selectedEvId || manualAvatar ? (
+                          <img 
+                             src={manualAvatar || EV_DATABASE.find(e => e.id === selectedEvId)?.image || "/assets/avatars/sedan.png"} 
+                             alt="Vehicle Avatar" 
+                             className="h-10 w-10 object-contain"
+                          />
+                     ) : (
                         <Car className="h-5 w-5 text-primary" />
                     )}
                   </div>
@@ -227,8 +291,7 @@ export function SettingsView() {
                                     key={type} 
                                     className="cursor-pointer hover:bg-accent rounded-lg p-4 flex flex-col items-center gap-2 border-2 border-transparent hover:border-primary/50 transition-all"
                                     onClick={() => {
-                                        // find first car of this type to get image path, or construct it
-                                        // This is a visual override only for now, ideally strictly mapped to car model
+                                        setManualAvatar(`/assets/avatars/${type}.png`)
                                         setOpenAvatarDialog(false)
                                     }}
                                   >
@@ -300,6 +363,7 @@ export function SettingsView() {
                                                       value={`${ev.make} ${ev.model} ${ev.trim || ''}`}
                                                       onSelect={() => {
                                                           setSelectedEvId(ev.id)
+                                                          setManualAvatar(null) // Clear manual override when car is selected
                                                           setBatteryCapacity(ev.capacity.toString())
                                                           setOpenCombobox(false)
                                                       }}

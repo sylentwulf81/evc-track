@@ -25,6 +25,7 @@ export type TranslationKeys = {
         deleting: string
         records: string
         sessions: string
+        theme: string
     }
     nav: {
         charging: string
@@ -92,6 +93,7 @@ export type TranslationKeys = {
         searchEv: string
         selectVehicle: string
         noVehicleFound: string
+        themeDesc: string
     }
     forms: {
         date: string
@@ -171,6 +173,7 @@ export const translations: Record<Language, TranslationKeys> = {
             deleting: "Deleting...",
             records: "records",
             sessions: "sessions",
+            theme: "Appearance",
         },
         nav: {
             charging: "Charging",
@@ -238,6 +241,7 @@ export const translations: Record<Language, TranslationKeys> = {
             guestMode: "Guest Mode",
             signInToSync: "Sign in to sync these settings across your devices.",
             version: "App Version",
+            themeDesc: "Select your preferred theme",
         },
         forms: {
             date: "Date",
@@ -315,6 +319,7 @@ export const translations: Record<Language, TranslationKeys> = {
             deleting: "Eliminando...",
             records: "registros",
             sessions: "sesiones",
+            theme: "Apariencia",
         },
         nav: {
             charging: "Carga",
@@ -373,11 +378,16 @@ export const translations: Record<Language, TranslationKeys> = {
             batteryCapacityDesc: "Usado para calcular energía añadida desde %",
             homeRate: "Tarifa Eléctrica Hogar",
             homeRateDesc: "Usado para auto-calcular costo de carga en casa",
+            selectEv: "Seleccionar EV Popular",
+            searchEv: "Buscar vehículo...",
+            selectVehicle: "Seleccionar vehículo",
+            noVehicleFound: "No se encontró vehículo.",
             dataManagement: "Gestión de Datos",
             exportData: "Exportar a CSV",
             guestMode: "Modo Invitado",
             signInToSync: "Inicia sesión para sincronizar estos ajustes.",
             version: "Versión de la App",
+            themeDesc: "Selecciona tu tema preferido",
         },
         forms: {
             date: "Fecha",
@@ -455,6 +465,7 @@ export const translations: Record<Language, TranslationKeys> = {
             deleting: "削除中...",
             records: "件",
             sessions: "回",
+            theme: "外観",
         },
         nav: {
             charging: "充電",
@@ -513,11 +524,16 @@ export const translations: Record<Language, TranslationKeys> = {
             batteryCapacityDesc: "％変化から充電量を計算するために使用",
             homeRate: "自宅電気料金",
             homeRateDesc: "自宅充電のコストを自動計算するために使用",
+            selectEv: "人気のEVを選択",
+            searchEv: "車両を検索...",
+            selectVehicle: "車両を選択",
+            noVehicleFound: "車両が見つかりません。",
             dataManagement: "データ管理",
             exportData: "CSVエクスポート",
             guestMode: "ゲストモード",
             signInToSync: "設定を同期するにはログインしてください。",
             version: "アプリバージョン",
+            themeDesc: "テーマを選択してください",
         },
         forms: {
             date: "日付",

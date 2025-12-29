@@ -74,6 +74,69 @@
   --sidebar-ring: oklch(0.65 0.25 250);
 }
 
+.charge {
+  --background: oklch(0.20 0.04 15); /* Coffee Bean adjusted */
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.25 0.04 15);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.25 0.04 15);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.88 0.25 110); /* Chartreuse approx */
+  --primary-foreground: oklch(0.20 0.04 15);
+  --secondary: oklch(0.55 0.08 230); /* Cerulean approx */
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.30 0.04 15);
+  --muted-foreground: oklch(0.70 0.04 15);
+  --accent: oklch(0.55 0.08 230);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.60 0.20 25); /* Cinnabar approx */
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.35 0.04 15);
+  --input: oklch(0.35 0.04 15);
+  --ring: oklch(0.88 0.25 110);
+  
+  /* Sidebar-specific overrides if needed */
+  --sidebar: oklch(0.20 0.04 15);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.88 0.25 110);
+  --sidebar-primary-foreground: oklch(0.20 0.04 15);
+  --sidebar-accent: oklch(0.30 0.04 15);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.35 0.04 15);
+  --sidebar-ring: oklch(0.88 0.25 110);
+}
+
+.sakura {
+  --background: #ffe7de;
+  --foreground: #562135;
+  --card: #fff5f2;
+  --card-foreground: #562135;
+  --popover: #fff5f2;
+  --popover-foreground: #562135;
+  --primary: #c3829e;
+  --primary-foreground: #562135;
+  --secondary: #e9b1cd;
+  --secondary-foreground: #562135;
+  --muted: #fcd1d7;
+  --muted-foreground: #8a3a52; /* darker mix for readable muted text */
+  --accent: #fcd1d7;
+  --accent-foreground: #562135;
+  --destructive: #b91c1c; /* Keep semantic error red or mix? Using standard red for safety */
+  --destructive-foreground: #fff;
+  --border: #e9b1cd;
+  --input: #e9b1cd;
+  --ring: #c3829e;
+
+  --sidebar: #ffe7de;
+  --sidebar-foreground: #562135;
+  --sidebar-primary: #c3829e;
+  --sidebar-primary-foreground: #562135;
+  --sidebar-accent: #fcd1d7;
+  --sidebar-accent-foreground: #562135;
+  --sidebar-border: #e9b1cd;
+  --sidebar-ring: #c3829e;
+}
+
 @theme inline {
   /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);

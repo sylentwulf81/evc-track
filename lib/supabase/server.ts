@@ -4,7 +4,17 @@ import { cookies } from "next/headers"
 export async function createClient() {
   const cookieStore = await cookies()
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseUrl.startsWith("http")) {
+    throw new Error(`Invalid/Missing NEXT_PUBLIC_SUPABASE_URL on server: ${supabaseUrl}`)
+  }
+  if (!supabaseKey) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY on server")
+  }
+
+  return createServerClient(supabaseUrl.trim(), supabaseKey.trim(), {
     cookies: {
       getAll() {
         return cookieStore.getAll()

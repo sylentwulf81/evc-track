@@ -38,9 +38,12 @@ import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export function ChargingTracker() {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [sessions, setSessions] = useState<ChargingSession[]>([])
   const [expenses, setExpenses] = useState<VehicleExpense[]>([])
@@ -65,6 +68,22 @@ export function ChargingTracker() {
       setExpenses(getLocalExpenses())
     }
   }, [user, supabase])
+
+  // Sync tab with URL
+  useEffect(() => {
+    const tab = searchParams.get("tab")
+    if (tab && (tab === "tracker" || tab === "expenses" || tab === "analytics" || tab === "settings")) {
+        setActiveTab(tab)
+    }
+  }, [searchParams])
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("tab", value)
+    router.replace(`?${params.toString()}`)
+  }
 
   useEffect(() => {
     // Check auth state
@@ -98,7 +117,7 @@ export function ChargingTracker() {
     startPercent: number
     endPercent: number | null
     kwh?: number | null
-    chargeType?: "fast" | "standard" | null
+    chargeType?: ChargingSession["charge_type"]
   }) => {
     if (user) {
       // Save to Supabase
@@ -152,7 +171,7 @@ export function ChargingTracker() {
       start_percent: number
       end_percent: number | null
       kwh?: number | null
-      charge_type?: "fast" | "standard" | null
+      charge_type?: ChargingSession["charge_type"]
       charged_at: string
     },
   ) => {
@@ -224,7 +243,7 @@ export function ChargingTracker() {
       </header>
 
       <main className="container md:max-w-5xl lg:max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Tabs defaultValue="tracker" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue="tracker" value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Desktop Top Nav */}
           <TabsList className="hidden md:grid w-full max-w-lg mx-auto grid-cols-4 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
             <TabsTrigger value="tracker" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
