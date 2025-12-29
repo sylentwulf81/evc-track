@@ -212,7 +212,7 @@ export function ChargingTracker() {
     <div className="min-h-screen bg-background pb-20 md:pb-6 relative overflow-x-hidden">
        {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container px-4 py-3 mx-auto max-w-md flex items-center justify-between">
+        <div className="container px-4 py-3 mx-auto md:max-w-5xl lg:max-w-6xl flex items-center justify-between">
            <div className="flex items-center gap-2">
             <Zap className="h-6 w-6 text-primary filled" />
             <h1 className="text-xl font-bold tracking-tight">EVC Track</h1>
@@ -229,7 +229,7 @@ export function ChargingTracker() {
                   <LogOut className="h-5 w-5" />
                 </Button>
               ) : (
-                 <Link href="/login">
+                 <Link href="/auth/login">
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <LogIn className="h-5 w-5" />
                   </Button>
@@ -239,10 +239,10 @@ export function ChargingTracker() {
         </div>
       </header>
 
-      <main className="container max-w-md mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <main className="container md:max-w-5xl lg:max-w-6xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <Tabs defaultValue="tracker" value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Desktop Top Nav */}
-          <TabsList className="hidden md:grid w-full grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
+          <TabsList className="hidden md:grid w-full max-w-md mx-auto grid-cols-3 mb-8 p-1 bg-muted/50 backdrop-blur-sm rounded-xl">
             <TabsTrigger value="tracker" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300">
               {t('nav.charging')}
             </TabsTrigger>
