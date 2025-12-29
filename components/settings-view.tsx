@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Save, Car, Download, Globe, LogIn, Moon, Sun, Laptop, Zap, Flower2 } from "lucide-react"
+import { Save, Car, Download, Globe, LogIn, Moon, Sun, Laptop, Zap, Flower2, ChevronLeft, ChevronRight, Check, ChevronsUpDown } from "lucide-react"
 import Link from "next/link"
 import { updateProfile, getProfile, getChargingSessions } from "@/app/actions"
 import { getLocalSessions, getLocalCurrency, setLocalCurrency } from "@/lib/storage"
@@ -16,20 +16,6 @@ import { useTheme } from "next-themes"
 import type { User } from "@supabase/supabase-js"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { Language } from "@/lib/translations"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { EV_DATABASE } from "@/lib/ev-data"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -50,7 +36,9 @@ export function SettingsView() {
   const [homeRate, setHomeRate] = useState("")
   const [currency, setCurrency] = useState("JPY")
 
-  const [openCombobox, setOpenCombobox] = useState(false)
+  const [openVehicleDialog, setOpenVehicleDialog] = useState(false)
+  const [vehicleSearchQuery, setVehicleSearchQuery] = useState("")
+  const [vehiclePage, setVehiclePage] = useState(1)
   
   const [selectedEvId, setSelectedEvId] = useState("")
   const [manualAvatar, setManualAvatar] = useState<string | null>(null)
@@ -62,6 +50,28 @@ export function SettingsView() {
       acc[ev.make].push(ev)
       return acc
   }, {} as Record<string, typeof EV_DATABASE>)
+
+  // Filter and paginate EVs
+  const ITEMS_PER_PAGE = 10
+  const filteredEVs = EV_DATABASE.filter((ev) => {
+    if (!vehicleSearchQuery) return true
+    const query = vehicleSearchQuery.toLowerCase()
+    return (
+      ev.make.toLowerCase().includes(query) ||
+      ev.model.toLowerCase().includes(query) ||
+      (ev.trim && ev.trim.toLowerCase().includes(query))
+    )
+  })
+  const totalPages = Math.ceil(filteredEVs.length / ITEMS_PER_PAGE)
+  const paginatedEVs = filteredEVs.slice(
+    (vehiclePage - 1) * ITEMS_PER_PAGE,
+    vehiclePage * ITEMS_PER_PAGE
+  )
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setVehiclePage(1)
+  }, [vehicleSearchQuery])
 
   const supabase = createClient()
 
@@ -176,6 +186,32 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
+        {!user && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <LogIn className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>{t('settings.signIn') || "Sign In"}</CardTitle>
+                  <CardDescription>
+                    {t('settings.signInToSync') || "Sign in to sync your data across devices"}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Link href="/auth/login" className="w-full">
+                <Button className="w-full gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
@@ -334,56 +370,118 @@ export function SettingsView() {
               <div className="space-y-4">
                   <div className="space-y-2 flex flex-col">
                       <Label>{t('settings.selectEv')}</Label>
-                      <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                          <PopoverTrigger asChild>
+                      <Button
+                          variant="outline"
+                          onClick={() => {
+                            setOpenVehicleDialog(true)
+                            setVehicleSearchQuery("")
+                            setVehiclePage(1)
+                          }}
+                          className="w-full justify-between font-normal"
+                      >
+                          {selectedEvId
+                              ? EV_DATABASE.find((ev) => ev.id === selectedEvId)?.model
+                                  ? `${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.make} ${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.model} ${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.trim || ''}`
+                                  : t('settings.selectVehicle')
+                              : t('settings.selectVehicle')}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                      
+                      <Dialog open={openVehicleDialog} onOpenChange={(open) => {
+                        setOpenVehicleDialog(open)
+                        if (!open) {
+                          setVehicleSearchQuery("")
+                          setVehiclePage(1)
+                        }
+                      }}>
+                        <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col p-0">
+                          <div className="p-4 border-b">
+                            <h2 className="text-lg font-semibold mb-3">{t('settings.selectVehicle')}</h2>
+                            <Input
+                              placeholder={t('settings.searchEv')}
+                              value={vehicleSearchQuery}
+                              onChange={(e) => setVehicleSearchQuery(e.target.value)}
+                              className="w-full"
+                              autoFocus={false}
+                            />
+                          </div>
+                          
+                          <div className="flex-1 overflow-y-auto p-4">
+                            {filteredEVs.length === 0 ? (
+                              <div className="text-center py-8 text-muted-foreground">
+                                {t('settings.noVehicleFound')}
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {paginatedEVs.map((ev) => (
+                                  <div
+                                    key={ev.id}
+                                    className={cn(
+                                      "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                                      selectedEvId === ev.id
+                                        ? "bg-primary/10 border-primary"
+                                        : "hover:bg-accent border-transparent hover:border-border"
+                                    )}
+                                    onClick={() => {
+                                      setSelectedEvId(ev.id)
+                                      setManualAvatar(null)
+                                      setBatteryCapacity(ev.capacity.toString())
+                                      setOpenVehicleDialog(false)
+                                      setVehicleSearchQuery("")
+                                      setVehiclePage(1)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "h-4 w-4 shrink-0",
+                                        selectedEvId === ev.id ? "opacity-100 text-primary" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-medium">{ev.make} {ev.model}</div>
+                                      {ev.trim && (
+                                        <div className="text-sm text-muted-foreground">{ev.trim}</div>
+                                      )}
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        {ev.capacity} kWh
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {totalPages > 1 && (
+                            <div className="p-4 border-t flex items-center justify-between gap-2">
                               <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={openCombobox}
-                                  className="w-full justify-between font-normal"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setVehiclePage((p) => Math.max(1, p - 1))}
+                                disabled={vehiclePage === 1}
+                                className="gap-1"
                               >
-                                  {selectedEvId
-                                      ? EV_DATABASE.find((ev) => ev.id === selectedEvId)?.model
-                                          ? `${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.make} ${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.model} ${EV_DATABASE.find((ev) => ev.id === selectedEvId)?.trim || ''}`
-                                          : t('settings.selectVehicle')
-                                      : t('settings.selectVehicle')}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <ChevronLeft className="h-4 w-4" />
+                                Previous
                               </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                              <Command>
-                                  <CommandInput placeholder={t('settings.searchEv')} />
-                                  <CommandList>
-                                      <CommandEmpty>{t('settings.noVehicleFound')}</CommandEmpty>
-                                      {Object.entries(groupedEVs).map(([make, evs]) => (
-                                          <CommandGroup key={make} heading={make}>
-                                              {evs.map((ev) => (
-                                                  <CommandItem
-                                                      key={ev.id}
-                                                      value={`${ev.make} ${ev.model} ${ev.trim || ''}`}
-                                                      onSelect={() => {
-                                                          setSelectedEvId(ev.id)
-                                                          setManualAvatar(null) // Clear manual override when car is selected
-                                                          setBatteryCapacity(ev.capacity.toString())
-                                                          setOpenCombobox(false)
-                                                      }}
-                                                  >
-                                                      <Check
-                                                          className={cn(
-                                                              "mr-2 h-4 w-4",
-                                                              selectedEvId === ev.id ? "opacity-100" : "opacity-0"
-                                                          )}
-                                                      />
-                                                      <span>{ev.model}</span>
-                                                      {ev.trim && <span className="ml-2 text-muted-foreground text-xs">({ev.trim})</span>}
-                                                  </CommandItem>
-                                              ))}
-                                          </CommandGroup>
-                                      ))}
-                                  </CommandList>
-                              </Command>
-                          </PopoverContent>
-                      </Popover>
+                              <span className="text-sm text-muted-foreground">
+                                Page {vehiclePage} of {totalPages}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setVehiclePage((p) => Math.min(totalPages, p + 1))}
+                                disabled={vehiclePage === totalPages}
+                                className="gap-1"
+                              >
+                                Next
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                      
                       <p className="text-xs text-muted-foreground">Selecting a vehicle only auto-fills the battery capacity below.</p>
                   </div>
 
@@ -460,20 +558,6 @@ export function SettingsView() {
                 </Button>
             </CardContent>
         </Card>
-        
-        {!user && (
-          <div className="text-center p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-             <div className="flex flex-col items-center gap-2">
-                 <p>{t('settings.signInToSync')}</p>
-                 <Link href="/auth/login" className="w-full">
-                     <Button variant="outline" className="w-full gap-2">
-                         <LogIn className="h-4 w-4" />
-                         Sign In
-                     </Button>
-                  </Link>
-             </div>
-          </div>
-        )}
     </div>
   )
 }

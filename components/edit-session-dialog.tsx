@@ -133,14 +133,28 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
           </DialogHeader>
           <form onSubmit={handleSubmit} className="grid gap-6 py-4">
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="space-y-2">
                 <Label htmlFor="edit-date">{t('forms.date')}</Label>
-                <Input id="edit-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="h-11" />
+                <Input 
+                  id="edit-date" 
+                  type="date" 
+                  value={date} 
+                  onChange={(e) => setDate(e.target.value)} 
+                  required 
+                  className="h-11" 
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-time">{t('forms.time') || "Time"}</Label>
-                <Input id="edit-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required className="h-11" />
+                <Input 
+                  id="edit-time" 
+                  type="time" 
+                  value={time} 
+                  onChange={(e) => setTime(e.target.value)} 
+                  required 
+                  className="h-11" 
+                />
               </div>
             </div>
 
