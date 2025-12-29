@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus } from "lucide-react"
+import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -39,6 +39,14 @@ import type { User } from "@supabase/supabase-js"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { useSearchParams, useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function ChargingTracker() {
   const { t } = useLanguage()
@@ -247,7 +255,44 @@ export function ChargingTracker() {
             <h1 className="text-xl font-bold tracking-tight">EVC Track</h1>
           </div>
           
-
+          {/* User Menu */}
+          <div className="flex items-center">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/?tab=settings" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -337,15 +382,7 @@ export function ChargingTracker() {
           </TabsContent>
           
           <TabsContent value="settings" className="focus-visible:outline-none focus-visible:ring-0 pb-20 md:pb-0">
-             <SettingsView />
-             {user && (
-                <div className="mt-8 flex justify-center pb-8">
-                     <Button variant="destructive" onClick={handleLogout} className="w-full max-w-sm gap-2">
-                        <LogOut className="h-4 w-4" />
-                        Log Out
-                     </Button>
-                </div>
-             )}
+             <SettingsView user={user} />
           </TabsContent>
 
           {/* Mobile Bottom Nav */}

@@ -137,6 +137,37 @@
   --sidebar-ring: #c3829e;
 }
 
+.popstar {
+  --background: #373b3e;
+  --foreground: #bec8d1;
+  --card: #454a4e;
+  --card-foreground: #bec8d1;
+  --popover: #454a4e;
+  --popover-foreground: #bec8d1;
+  --primary: #e12885;
+  --primary-foreground: #bec8d1;
+  --secondary: #86cecb;
+  --secondary-foreground: #373b3e;
+  --muted: #5a6065;
+  --muted-foreground: #bec8d1;
+  --accent: #137a7f;
+  --accent-foreground: #bec8d1;
+  --destructive: #e12885;
+  --destructive-foreground: #bec8d1;
+  --border: #5a6065;
+  --input: #5a6065;
+  --ring: #e12885;
+
+  --sidebar: #373b3e;
+  --sidebar-foreground: #bec8d1;
+  --sidebar-primary: #e12885;
+  --sidebar-primary-foreground: #bec8d1;
+  --sidebar-accent: #86cecb;
+  --sidebar-accent-foreground: #373b3e;
+  --sidebar-border: #5a6065;
+  --sidebar-ring: #e12885;
+}
+
 @theme inline {
   /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);

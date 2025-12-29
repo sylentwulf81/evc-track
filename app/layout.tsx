@@ -67,7 +67,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-          themes={["light", "dark", "charge", "sakura"]}
+          themes={["light", "dark", "charge", "sakura", "popstar"]}
         >
           <LanguageProvider>
             {children}

@@ -1,14 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Save, Car, Download, Globe, LogIn, Moon, Sun, Laptop, Zap, Flower2, ChevronLeft, ChevronRight, Check, ChevronsUpDown } from "lucide-react"
-import Link from "next/link"
+import { Save, Car, Download, Globe, Moon, Sun, Laptop, Zap, Flower2, Star, ChevronLeft, ChevronRight, Check, ChevronsUpDown } from "lucide-react"
 import { updateProfile, getProfile, getChargingSessions } from "@/app/actions"
 import { getLocalSessions, getLocalCurrency, setLocalCurrency } from "@/lib/storage"
 import { toast } from "sonner"
@@ -24,10 +22,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 const LOCAL_STORAGE_BATTERY = "evc_battery_capacity"
 const LOCAL_STORAGE_RATE = "evc_home_rate"
 
-export function SettingsView() {
+interface SettingsViewProps {
+  user: User | null
+}
+
+export function SettingsView({ user }: SettingsViewProps) {
   const { theme, setTheme } = useTheme()
   const { t, language, setLanguage } = useLanguage()
-  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   
@@ -73,14 +74,8 @@ export function SettingsView() {
     setVehiclePage(1)
   }, [vehicleSearchQuery])
 
-  const supabase = createClient()
-
   useEffect(() => {
     const loadData = async () => {
-      // Check auth
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-
       if (user) {
         // Load from server
         const profile = await getProfile()
@@ -104,7 +99,7 @@ export function SettingsView() {
     }
 
     loadData()
-  }, [supabase])
+  }, [user])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -186,32 +181,6 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-        {!user && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <LogIn className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle>{t('settings.signIn') || "Sign In"}</CardTitle>
-                  <CardDescription>
-                    {t('settings.signInToSync') || "Sign in to sync your data across devices"}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Link href="/auth/login" className="w-full">
-                <Button className="w-full gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        )}
-
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
@@ -258,7 +227,7 @@ export function SettingsView() {
             </div>
           </CardHeader>
           <CardContent>
-             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+             <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
                 <Button 
                     variant={theme === "light" ? "default" : "outline"}
                     className="flex flex-col gap-1 h-auto py-3"
@@ -276,14 +245,6 @@ export function SettingsView() {
                    <span className="text-xs">Dark</span>
                 </Button>
                 <Button 
-                    variant={theme === "system" ? "default" : "outline"}
-                    className="flex flex-col gap-1 h-auto py-3"
-                    onClick={() => setTheme("system")}
-                >
-                   <Laptop className="h-4 w-4" />
-                   <span className="text-xs">System</span>
-                </Button>
-                <Button 
                     variant={theme === "charge" ? "default" : "outline"}
                     className="flex flex-col gap-1 h-auto py-3"
                     onClick={() => setTheme("charge")}
@@ -298,6 +259,22 @@ export function SettingsView() {
                 >
                    <Flower2 className="h-4 w-4" />
                    <span className="text-xs">Sakura</span>
+                </Button>
+                <Button 
+                    variant={theme === "popstar" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("popstar")}
+                >
+                   <Star className="h-4 w-4" />
+                   <span className="text-xs">Pop Star</span>
+                </Button>
+                <Button 
+                    variant={theme === "system" ? "default" : "outline"}
+                    className="flex flex-col gap-1 h-auto py-3"
+                    onClick={() => setTheme("system")}
+                >
+                   <Laptop className="h-4 w-4" />
+                   <span className="text-xs">System</span>
                 </Button>
             </div>
           </CardContent>
