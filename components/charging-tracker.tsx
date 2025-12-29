@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Zap, LogOut, LogIn, Settings, BarChart3, Menu, Wrench, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -54,26 +54,11 @@ export function ChargingTracker() {
   const [activeTab, setActiveTab] = useState("tracker")
   const supabase = createClient()
 
-  const loadData = useCallback(async () => {
-    if (user) {
-      // Load from Supabase for authenticated users
-      const { data: sessionData } = await supabase.from("charging_sessions").select("*").order("charged_at", { ascending: false })
-      setSessions(sessionData || [])
-
-      const { data: expenseData } = await supabase.from("vehicle_expenses").select("*").order("expense_date", { ascending: false })
-      setExpenses(expenseData || [])
-    } else {
-      // Load from localStorage for guests
-      setSessions(getLocalSessions())
-      setExpenses(getLocalExpenses())
-    }
-  }, [user, supabase])
-
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get("tab")
-    if (tab && (tab === "tracker" || tab === "expenses" || tab === "analytics" || tab === "settings")) {
-        setActiveTab(tab)
+    if (tab && ["tracker", "expenses", "analytics", "settings"].includes(tab)) {
+      setActiveTab(tab)
     }
   }, [searchParams])
 
@@ -106,11 +91,27 @@ export function ChargingTracker() {
     return () => subscription.unsubscribe()
   }, [supabase])
 
+  // Load data when user or loading state changes
   useEffect(() => {
-    if (!loading) {
-      loadData()
+    if (loading) return
+
+    const loadData = async () => {
+      if (user) {
+        // Load from Supabase for authenticated users
+        const { data: sessionData } = await supabase.from("charging_sessions").select("*").order("charged_at", { ascending: false })
+        setSessions(sessionData || [])
+
+        const { data: expenseData } = await supabase.from("vehicle_expenses").select("*").order("expense_date", { ascending: false })
+        setExpenses(expenseData || [])
+      } else {
+        // Load from localStorage for guests
+        setSessions(getLocalSessions())
+        setExpenses(getLocalExpenses())
+      }
     }
-  }, [loading, user, loadData])
+
+    loadData()
+  }, [loading, user, supabase])
 
   const handleAddSession = async (data: {
     cost: number | null
@@ -130,7 +131,9 @@ export function ChargingTracker() {
         user_id: user.id,
       })
       if (!error) {
-        loadData()
+        // Reload data
+        const { data: sessionData } = await supabase.from("charging_sessions").select("*").order("charged_at", { ascending: false })
+        setSessions(sessionData || [])
       }
       return { error: error?.message }
     } else {
@@ -142,7 +145,7 @@ export function ChargingTracker() {
         kwh: data.kwh || null,
         charge_type: data.chargeType || null,
       })
-      loadData()
+      setSessions(getLocalSessions())
       return {}
     }
   }
@@ -154,12 +157,14 @@ export function ChargingTracker() {
               user_id: user.id
           })
           if (!error) {
-              loadData()
+              // Reload data
+              const { data: expenseData } = await supabase.from("vehicle_expenses").select("*").order("expense_date", { ascending: false })
+              setExpenses(expenseData || [])
           }
           return { error: error?.message }
       } else {
           addLocalExpense(data as VehicleExpense) 
-          loadData()
+          setExpenses(getLocalExpenses())
           return {}
       }
   }
@@ -180,13 +185,15 @@ export function ChargingTracker() {
       const { error } = await supabase.from("charging_sessions").update(updates).eq("id", id)
 
       if (!error) {
-        loadData()
+        // Reload data
+        const { data: sessionData } = await supabase.from("charging_sessions").select("*").order("charged_at", { ascending: false })
+        setSessions(sessionData || [])
       }
       return { error: error?.message }
     } else {
       // Update in localStorage
       updateLocalSession(id, updates)
-      loadData()
+      setSessions(getLocalSessions())
       return {}
     }
   }
@@ -197,13 +204,15 @@ export function ChargingTracker() {
       const { error } = await supabase.from("charging_sessions").delete().eq("id", id)
 
       if (!error) {
-        loadData()
+        // Reload data
+        const { data: sessionData } = await supabase.from("charging_sessions").select("*").order("charged_at", { ascending: false })
+        setSessions(sessionData || [])
       }
       return { error: error?.message }
     } else {
       // Delete from localStorage
       deleteLocalSession(id)
-      loadData()
+      setSessions(getLocalSessions())
       return {}
     }
   }

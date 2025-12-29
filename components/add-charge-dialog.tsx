@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -57,8 +57,6 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
   const [useHomeCharge, setUseHomeCharge] = useState(false)
   const [batteryCapacity, setBatteryCapacity] = useState<number | null>(null)
   const [homeRate, setHomeRate] = useState<number | null>(null)
-
-  const formRef = useRef<HTMLFormElement>(null)
 
   // Load Profile Data
   useEffect(() => {
@@ -123,48 +121,46 @@ export function AddChargeDialog({ onAdd, user, trigger }: AddChargeDialogProps) 
     e.preventDefault()
     setLoading(true)
 
-    // Only startPercent is mandatory
-    if (!startPercent) {
-        toast.error(t('common.error') || "Please enter a starting percentage")
-        setLoading(false)
-        return
-    }
+    try {
+      // Only startPercent is mandatory
+      if (!startPercent) {
+        throw new Error(t('common.error') || "Please enter a starting percentage")
+      }
 
-    const start = Number.parseFloat(startPercent)
-    const end = endPercent ? Number.parseFloat(endPercent) : null
-    const costVal = cost ? Number.parseFloat(cost) : null
-    const odoVal = odometer ? Number.parseFloat(odometer) : null
+      const start = Number.parseFloat(startPercent)
+      const end = endPercent ? Number.parseFloat(endPercent) : null
+      const costVal = cost ? Number.parseFloat(cost) : null
+      const odoVal = odometer ? Number.parseFloat(odometer) : null
 
-    // Helper for validation only if value is provided
-    if (start < 0 || start > 100) {
-      toast.error(t('common.error') || "Start percentage must be between 0 and 100")
-      setLoading(false)
-      return
-    }
-    
-    if (end !== null && (end < 0 || end > 100)) {
-        toast.error(t('common.error') || "End percentage must be between 0 and 100")
-        setLoading(false)
-        return
-    }
+      // Validation
+      if (start < 0 || start > 100) {
+        throw new Error(t('common.error') || "Start percentage must be between 0 and 100")
+      }
+      
+      if (end !== null && (end < 0 || end > 100)) {
+        throw new Error(t('common.error') || "End percentage must be between 0 and 100")
+      }
 
-    const res = await onAdd({
-      cost: costVal,
-      startPercent: start,
-      endPercent: end,
-      kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined,
-      chargeType: chargeType,
-      odometer: odoVal,
-    })
+      const res = await onAdd({
+        cost: costVal,
+        startPercent: start,
+        endPercent: end,
+        kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined,
+        chargeType: chargeType,
+        odometer: odoVal,
+      })
 
-    setLoading(false)
+      if (res.error) {
+        throw new Error(res.error)
+      }
 
-    if (res.error) {
-      toast.error(res.error)
-    } else {
       toast.success(t('tracker.sessionAdded') || "Charging session added")
       setOpen(false)
       resetForm()
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
     }
   }
 

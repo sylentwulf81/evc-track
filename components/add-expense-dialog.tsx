@@ -59,9 +59,8 @@ export function AddExpenseDialog({ onAdd, user, trigger }: AddExpenseDialogProps
         currency: "JPY", // Default currency
       }
 
-      let result
       // Always use onAdd, let parent handle storage logic (local vs remote)
-      result = await onAdd(expenseData)
+      const result = await onAdd(expenseData)
 
       if (result.error) {
         throw new Error(result.error)
@@ -88,7 +87,10 @@ export function AddExpenseDialog({ onAdd, user, trigger }: AddExpenseDialogProps
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => {
+      setOpen(val)
+      if (!val) resetForm()
+    }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="h-14 w-14 rounded-full shadow-lg p-0 bg-orange-500 hover:bg-orange-600">

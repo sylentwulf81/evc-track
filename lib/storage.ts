@@ -63,10 +63,6 @@ export function addLocalSession(session: Omit<ChargingSession, "id" | "charged_a
 export function deleteLocalSession(id: string): void {
   const sessions = getLocalSessions()
   const filtered = sessions.filter((s) => s.id !== id)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)) // BUG FIX: was saving filtered but variable passed was sessions? No, wait. 
-  // implementation below relies on replace_file_content, checking logic correctness:
-  // previous code: localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
-  // so this is fine.
   localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
 }
 
