@@ -38,8 +38,7 @@ export function SettingsView({ user }: SettingsViewProps) {
   const [currency, setCurrency] = useState("JPY")
 
   const [openVehicleDialog, setOpenVehicleDialog] = useState(false)
-  const [vehicleSearchQuery, setVehicleSearchQuery] = useState("")
-  const [vehiclePage, setVehiclePage] = useState(1)
+  const [selectedMake, setSelectedMake] = useState<string | null>(null)
   
   const [selectedEvId, setSelectedEvId] = useState("")
   const [manualAvatar, setManualAvatar] = useState<string | null>(null)
@@ -72,27 +71,11 @@ export function SettingsView({ user }: SettingsViewProps) {
       return acc
   }, {} as Record<string, typeof EV_DATABASE>)
 
-  // Filter and paginate EVs
-  const ITEMS_PER_PAGE = 10
-  const filteredEVs = EV_DATABASE.filter((ev) => {
-    if (!vehicleSearchQuery) return true
-    const query = vehicleSearchQuery.toLowerCase()
-    return (
-      ev.make.toLowerCase().includes(query) ||
-      ev.model.toLowerCase().includes(query) ||
-      (ev.trim && ev.trim.toLowerCase().includes(query))
-    )
-  })
-  const totalPages = Math.ceil(filteredEVs.length / ITEMS_PER_PAGE)
-  const paginatedEVs = filteredEVs.slice(
-    (vehiclePage - 1) * ITEMS_PER_PAGE,
-    vehiclePage * ITEMS_PER_PAGE
-  )
+  // Get unique makes sorted alphabetically
+  const makes = Object.keys(groupedEVs).sort()
 
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setVehiclePage(1)
-  }, [vehicleSearchQuery])
+  // Get models for selected make
+  const modelsForMake = selectedMake ? groupedEVs[selectedMake] || [] : []
 
   useEffect(() => {
     const loadData = async () => {
@@ -417,30 +400,54 @@ export function SettingsView({ user }: SettingsViewProps) {
                       <Dialog open={openVehicleDialog} onOpenChange={(open) => {
                         setOpenVehicleDialog(open)
                         if (!open) {
-                          setVehicleSearchQuery("")
-                          setVehiclePage(1)
+                          setSelectedMake(null)
                         }
                       }}>
                         <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col p-0">
                           <div className="p-4 border-b">
-                            <h2 className="text-lg font-semibold mb-3">{t('settings.selectVehicle')}</h2>
-                            <Input
-                              placeholder={t('settings.searchEv')}
-                              value={vehicleSearchQuery}
-                              onChange={(e) => setVehicleSearchQuery(e.target.value)}
-                              className="w-full"
-                              autoFocus={false}
-                            />
+                            <div className="flex items-center gap-2 mb-3">
+                              {selectedMake && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setSelectedMake(null)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <h2 className="text-lg font-semibold">
+                                {selectedMake 
+                                  ? `${selectedMake} Models`
+                                  : t('settings.selectMake') || "Select Make"}
+                              </h2>
+                            </div>
                           </div>
                           
                           <div className="flex-1 overflow-y-auto p-4">
-                            {filteredEVs.length === 0 ? (
-                              <div className="text-center py-8 text-muted-foreground">
-                                {t('settings.noVehicleFound')}
+                            {!selectedMake ? (
+                              // Show makes list
+                              <div className="grid grid-cols-2 gap-3">
+                                {makes.map((make) => (
+                                  <div
+                                    key={make}
+                                    className="flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-accent border-transparent hover:border-border"
+                                    onClick={() => setSelectedMake(make)}
+                                  >
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-medium">{make}</div>
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        {groupedEVs[make].length} {groupedEVs[make].length === 1 ? 'model' : 'models'}
+                                      </div>
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                                  </div>
+                                ))}
                               </div>
                             ) : (
-                              <div className="space-y-4">
-                                {paginatedEVs.map((ev) => (
+                              // Show models for selected make
+                              <div className="space-y-3">
+                                {modelsForMake.map((ev) => (
                                   <div
                                     key={ev.id}
                                     className={cn(
@@ -454,8 +461,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                                       setManualAvatar(null)
                                       setBatteryCapacity(ev.capacity.toString())
                                       setOpenVehicleDialog(false)
-                                      setVehicleSearchQuery("")
-                                      setVehiclePage(1)
+                                      setSelectedMake(null)
                                     }}
                                   >
                                     <Check
@@ -465,7 +471,7 @@ export function SettingsView({ user }: SettingsViewProps) {
                                       )}
                                     />
                                     <div className="flex-1 min-w-0">
-                                      <div className="font-medium">{ev.make} {ev.model}</div>
+                                      <div className="font-medium">{ev.model}</div>
                                       {ev.trim && (
                                         <div className="text-sm text-muted-foreground">{ev.trim}</div>
                                       )}
@@ -478,34 +484,6 @@ export function SettingsView({ user }: SettingsViewProps) {
                               </div>
                             )}
                           </div>
-                          
-                          {totalPages > 1 && (
-                            <div className="p-4 border-t flex items-center justify-between gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setVehiclePage((p) => Math.max(1, p - 1))}
-                                disabled={vehiclePage === 1}
-                                className="gap-1"
-                              >
-                                <ChevronLeft className="h-4 w-4" />
-                                Previous
-                              </Button>
-                              <span className="text-sm text-muted-foreground">
-                                Page {vehiclePage} of {totalPages}
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setVehiclePage((p) => Math.min(totalPages, p + 1))}
-                                disabled={vehiclePage === totalPages}
-                                className="gap-1"
-                              >
-                                Next
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
                         </DialogContent>
                       </Dialog>
                       

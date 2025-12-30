@@ -92,6 +92,8 @@ export type TranslationKeys = {
         selectEv: string
         searchEv: string
         selectVehicle: string
+        selectMake: string
+        selectModel: string
         noVehicleFound: string
         themeDesc: string
     }
@@ -137,6 +139,10 @@ export type TranslationKeys = {
         combinedCosts: string
         chargingCosts: string
         byChargeType: string
+        homeVsExternal: string
+        home: string
+        external: string
+        noChargingData: string
         vehicleExpenses: string
         byCategory: string
         noExpenseData: string
@@ -144,6 +150,20 @@ export type TranslationKeys = {
         chargingPlusExpenses: string
         chargingTotal: string
         expensesTotal: string
+        roiCalculator: string
+        roiCalculatorDesc: string
+        gasPrice: string
+        perGallon: string
+        gasMileage: string
+        evMileage: string
+        milesPerYear: string
+        currentEvStats: string
+        totalSpent: string
+        annualGasCost: string
+        annualEvCost: string
+        annualSavings: string
+        savingsPercent: string
+        enterValues: string
     }
 }
 
@@ -235,6 +255,8 @@ export const translations: Record<Language, TranslationKeys> = {
             selectEv: "Select Popular EV",
             searchEv: "Search vehicle...",
             selectVehicle: "Select vehicle",
+            selectMake: "Select Make",
+            selectModel: "Select Model",
             noVehicleFound: "No vehicle found.",
             dataManagement: "Data Management",
             exportData: "Export to CSV",
@@ -262,7 +284,7 @@ export const translations: Record<Language, TranslationKeys> = {
             vehicleBattery: "Vehicle Battery",
             homeRate: "Home Rate",
             titlePlaceholder: "e.g. Oil Change, New Tires",
-            notesPlaceholder: "Additional details...",
+            notesPlaceholder: "Add any notes about this charging session...",
             energy: "Energy",
             dateTime: "Date & Time",
             chargingProgress: "Charging Progress",
@@ -292,6 +314,20 @@ export const translations: Record<Language, TranslationKeys> = {
             chargingPlusExpenses: "Charging + Expenses",
             chargingTotal: "Charging Total",
             expensesTotal: "Expenses Total",
+            roiCalculator: "EV vs Gas ROI Calculator",
+            roiCalculatorDesc: "Compare your EV charging costs with estimated gas costs",
+            gasPrice: "Gas Price",
+            perGallon: "per gallon/L",
+            gasMileage: "Gas Vehicle MPG/km per L",
+            evMileage: "EV Efficiency",
+            milesPerYear: "Annual Miles/km",
+            currentEvStats: "Your Current EV Stats",
+            totalSpent: "Total Spent",
+            annualGasCost: "Annual Gas Cost",
+            annualEvCost: "Annual EV Cost",
+            annualSavings: "Annual Savings",
+            savingsPercent: "Savings",
+            enterValues: "Enter values above to calculate ROI",
         }
     },
     es: {
@@ -381,6 +417,8 @@ export const translations: Record<Language, TranslationKeys> = {
             selectEv: "Seleccionar EV Popular",
             searchEv: "Buscar vehículo...",
             selectVehicle: "Seleccionar vehículo",
+            selectMake: "Seleccionar Marca",
+            selectModel: "Seleccionar Modelo",
             noVehicleFound: "No se encontró vehículo.",
             dataManagement: "Gestión de Datos",
             exportData: "Exportar a CSV",
@@ -408,7 +446,7 @@ export const translations: Record<Language, TranslationKeys> = {
             vehicleBattery: "Batería Vehículo",
             homeRate: "Tarifa Hogar",
             titlePlaceholder: "ej. Cambio de Aceite",
-            notesPlaceholder: "Detalles adicionales...",
+            notesPlaceholder: "Añade notas sobre esta sesión de carga...",
             energy: "Energía",
             dateTime: "Fecha y Hora",
             chargingProgress: "Progreso Carga",
@@ -438,6 +476,20 @@ export const translations: Record<Language, TranslationKeys> = {
             chargingPlusExpenses: "Carga + Gastos",
             chargingTotal: "Total Carga",
             expensesTotal: "Total Gastos",
+            roiCalculator: "Calculadora ROI EV vs Gasolina",
+            roiCalculatorDesc: "Compara tus costos de carga EV con costos estimados de gasolina",
+            gasPrice: "Precio de Gasolina",
+            perGallon: "por galón/L",
+            gasMileage: "Rendimiento Vehículo Gas (MPG/km por L)",
+            evMileage: "Eficiencia EV",
+            milesPerYear: "Millas/km Anuales",
+            currentEvStats: "Tus Estadísticas EV Actuales",
+            totalSpent: "Total Gastado",
+            annualGasCost: "Costo Anual Gasolina",
+            annualEvCost: "Costo Anual EV",
+            annualSavings: "Ahorro Anual",
+            savingsPercent: "Ahorro",
+            enterValues: "Ingresa valores arriba para calcular ROI",
         }
     },
     ja: {
@@ -527,6 +579,8 @@ export const translations: Record<Language, TranslationKeys> = {
             selectEv: "人気のEVを選択",
             searchEv: "車両を検索...",
             selectVehicle: "車両を選択",
+            selectMake: "メーカーを選択",
+            selectModel: "モデルを選択",
             noVehicleFound: "車両が見つかりません。",
             dataManagement: "データ管理",
             exportData: "CSVエクスポート",
@@ -554,7 +608,7 @@ export const translations: Record<Language, TranslationKeys> = {
             vehicleBattery: "バッテリー容量",
             homeRate: "自宅単価",
             titlePlaceholder: "例: オイル交換、タイヤ交換",
-            notesPlaceholder: "詳細...",
+            notesPlaceholder: "この充電セッションに関するメモを追加...",
             energy: "エネルギー",
             dateTime: "日時",
             chargingProgress: "充電状況",
@@ -577,6 +631,10 @@ export const translations: Record<Language, TranslationKeys> = {
             combinedCosts: "充電とメンテナンスの合計コスト",
             chargingCosts: "充電コスト",
             byChargeType: "充電タイプ別",
+            homeVsExternal: "自宅 vs 外部充電",
+            home: "自宅",
+            external: "外部",
+            noChargingData: "充電データなし",
             vehicleExpenses: "車両経費",
             byCategory: "カテゴリー別",
             noExpenseData: "経費データなし",
@@ -584,6 +642,20 @@ export const translations: Record<Language, TranslationKeys> = {
             chargingPlusExpenses: "充電 + 経費",
             chargingTotal: "充電合計",
             expensesTotal: "経費合計",
+            roiCalculator: "EV vs ガソリン ROI 計算機",
+            roiCalculatorDesc: "EV充電コストと推定ガソリンコストを比較",
+            gasPrice: "ガソリン価格",
+            perGallon: "ガロン/Lあたり",
+            gasMileage: "ガソリン車燃費",
+            evMileage: "EV効率",
+            milesPerYear: "年間走行距離",
+            currentEvStats: "現在のEV統計",
+            totalSpent: "総支出",
+            annualGasCost: "年間ガソリンコスト",
+            annualEvCost: "年間EVコスト",
+            annualSavings: "年間節約額",
+            savingsPercent: "節約率",
+            enterValues: "上記の値を入力してROIを計算",
         }
     },
 }

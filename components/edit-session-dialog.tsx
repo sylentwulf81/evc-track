@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   AlertDialog,
@@ -43,6 +44,7 @@ interface EditSessionDialogProps {
       charge_type?: ChargingSession['charge_type']
       charged_at: string
       odometer?: number | null
+      notes?: string | null
     },
   ) => Promise<{ error?: string }>
   onDelete: (id: string) => Promise<{ error?: string }>
@@ -61,6 +63,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
   const [kwh, setKwh] = useState<string>("")
   const [odometer, setOdometer] = useState("")
   const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>(null)
+  const [notes, setNotes] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
 
@@ -73,6 +76,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       setKwh(session.kwh?.toString() || "")
       setOdometer(session.odometer ? session.odometer.toString() : "")
       setChargeType(session.charge_type || null)
+      setNotes(session.notes || "")
 
       const chargedDate = new Date(session.charged_at)
       setDate(format(chargedDate, "yyyy-MM-dd"))
@@ -98,6 +102,7 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
       charge_type: chargeType || null,
       charged_at: chargedAt,
       odometer: odometer ? Number.parseFloat(odometer) : null,
+      notes: notes.trim() || null,
     })
 
     setIsLoading(false)
@@ -248,6 +253,19 @@ export function EditSessionDialog({ session, open, onOpenChange, onSave, onDelet
                   <SelectItem value="standard">{t('tracker.standardStandard') || "Standard Charge"}</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-notes">
+                {t('forms.notes') || "Notes"} <span className="text-muted-foreground text-xs font-normal">({t('common.optional')})</span>
+              </Label>
+              <Textarea
+                id="edit-notes"
+                placeholder={t('forms.notesPlaceholder') || "Add any notes about this charging session..."}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="min-h-[80px] resize-none"
+              />
             </div>
             
             {error && <p className="text-sm text-destructive">{error}</p>}

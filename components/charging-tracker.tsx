@@ -208,6 +208,8 @@ export function ChargingTracker() {
     kwh?: number | null
     chargeType?: ChargingSession["charge_type"]
     odometer?: number | null
+    notes?: string | null
+    isHome?: boolean
   }) => {
     if (!activeSession) return { error: "No active session" }
 
@@ -217,6 +219,8 @@ export function ChargingTracker() {
       end_percent: data.endPercent,
       kwh: data.kwh,
       charge_type: data.chargeType,
+      notes: data.notes || null,
+      is_home: data.isHome || false,
       status: 'completed' as const,
       // usage of session_start as the official date for "charged_at" when completed? 
       // Or keep charged_at as creation time? usually charged_at is fine.
@@ -251,6 +255,9 @@ export function ChargingTracker() {
     endPercent: number | null
     kwh?: number | null
     chargeType?: ChargingSession["charge_type"]
+    odometer?: number | null
+    notes?: string | null
+    isHome?: boolean
   }) => {
     // ... existing handleAddSession logic (for manual add)
     if (user) {
@@ -261,6 +268,8 @@ export function ChargingTracker() {
         end_percent: data.endPercent,
         kwh: data.kwh || null,
         charge_type: data.chargeType || null,
+        notes: data.notes || null,
+        is_home: data.isHome || false,
         user_id: user.id,
         status: 'completed'
       })
@@ -314,6 +323,8 @@ export function ChargingTracker() {
       kwh?: number | null
       charge_type?: ChargingSession["charge_type"]
       charged_at: string
+      odometer?: number | null
+      notes?: string | null
     },
   ) => {
     if (user) {

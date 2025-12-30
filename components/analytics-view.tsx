@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { ChargingSession, VehicleExpense } from "@/lib/storage"
 import { format, parseISO, startOfMonth, subMonths } from "date-fns"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { ROICalculator } from "@/components/roi-calculator"
 
 interface AnalyticsViewProps {
   sessions: ChargingSession[]
@@ -97,23 +98,28 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
       .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime())
   }, [sessions, expenses])
 
-  // Charge Type Distribution
-  const typeData = useMemo(() => {
-    const data = [
-        { name: "Fast", value: 0 },
-        { name: "Standard", value: 0 },
-        { name: "Other", value: 0 }
-    ]
+  // Home vs External Charging
+  const homeVsExternalData = useMemo(() => {
+    let homeTotal = 0
+    let externalTotal = 0
 
     sessions.forEach(s => {
         const cost = s.cost || 0
-        if (s.charge_type === "fast") data[0].value += cost
-        else if (s.charge_type === "standard") data[1].value += cost
-        else data[2].value += cost
+        // Use is_home if available, otherwise infer from charge_type (level1/level2 are typically home)
+        const isHome = s.is_home ?? (s.charge_type === "level1" || s.charge_type === "level2")
+        if (isHome) {
+          homeTotal += cost
+        } else {
+          externalTotal += cost
+        }
     })
 
-    return data.filter(d => d.value > 0)
-  }, [sessions])
+    const data = []
+    if (homeTotal > 0) data.push({ name: t('analytics.home') || "Home", value: homeTotal })
+    if (externalTotal > 0) data.push({ name: t('analytics.external') || "External", value: externalTotal })
+
+    return data
+  }, [sessions, t])
   
   // Expenses Breakdown
   const expensesBreakdown = useMemo(() => {
@@ -193,28 +199,34 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>{t('analytics.chargingCosts')}</CardTitle>
-            <CardDescription>{t('analytics.byChargeType')}</CardDescription>
+            <CardDescription>{t('analytics.homeVsExternal') || "Home vs External Charging"}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={typeData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {typeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `${value.toLocaleString()}`} />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+            {homeVsExternalData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={homeVsExternalData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {homeVsExternalData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `${value.toLocaleString()}`} />
+                  <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                {t('analytics.noChargingData') || "No charging data"}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -286,6 +298,9 @@ export function AnalyticsView({ sessions, expenses = [] }: AnalyticsViewProps) {
               </CardContent>
           </Card>
        </div>
+
+      {/* ROI Calculator */}
+      <ROICalculator sessions={sessions} />
     </div>
   )
 }

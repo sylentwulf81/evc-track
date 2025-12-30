@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Home, Zap, Battery, BatteryFull, Plug } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -32,6 +33,8 @@ interface AddChargeDialogProps {
     kwh?: number | null
     chargeType?: ChargingSession['charge_type']
     odometer?: number | null
+    notes?: string | null
+    isHome?: boolean
   }) => Promise<{ error?: string }>
   user: User | null
   trigger?: React.ReactNode
@@ -57,6 +60,7 @@ export function AddChargeDialog({ onAdd, user, trigger, initialData }: AddCharge
   const [kwhAdded, setKwhAdded] = useState("")
   const [odometer, setOdometer] = useState("")
   const [chargeType, setChargeType] = useState<ChargingSession['charge_type']>("standard")
+  const [notes, setNotes] = useState("")
 
   // Smart Logic State
   const [useHomeCharge, setUseHomeCharge] = useState(false)
@@ -157,6 +161,8 @@ export function AddChargeDialog({ onAdd, user, trigger, initialData }: AddCharge
         kwh: kwhAdded ? Number.parseFloat(kwhAdded) : undefined,
         chargeType: chargeType,
         odometer: odoVal,
+        notes: notes.trim() || null,
+        isHome: useHomeCharge,
       })
 
       if (res.error) {
@@ -184,6 +190,7 @@ export function AddChargeDialog({ onAdd, user, trigger, initialData }: AddCharge
     setOdometer("")
     setChargeType("standard")
     setUseHomeCharge(false)
+    setNotes("")
   }
 
   return (
@@ -336,6 +343,16 @@ export function AddChargeDialog({ onAdd, user, trigger, initialData }: AddCharge
             </div>
           )}
 
+          <div className="grid gap-2">
+            <Label htmlFor="notes">{t('forms.notes') || "Notes"} <span className="text-xs text-muted-foreground font-normal">({t('common.optional')})</span></Label>
+            <Textarea
+              id="notes"
+              placeholder={t('forms.notesPlaceholder') || "Add any notes about this charging session..."}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="min-h-[80px] resize-none"
+            />
+          </div>
 
           <Button type="submit" disabled={loading} className="w-full mt-2">
             {loading ? t('common.loading') : t('tracker.addSession')}

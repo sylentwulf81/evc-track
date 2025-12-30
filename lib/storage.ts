@@ -12,6 +12,8 @@ export interface ChargingSession {
   charge_type?: "level1" | "level2" | "chademo" | "ccs" | "tesla" | "type2" | "fast" | "standard" | null
   currency: string
   odometer?: number | null
+  notes?: string | null
+  is_home?: boolean | null
 }
 
 
@@ -48,7 +50,9 @@ export function getLocalSessions(): ChargingSession[] {
   // Backfill status for old sessions if missing
   return sessions.map((s: any) => ({
       ...s,
-      status: s.status || 'completed'
+      status: s.status || 'completed',
+      notes: s.notes || null,
+      is_home: s.is_home ?? false
   }))
 }
 
