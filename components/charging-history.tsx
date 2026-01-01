@@ -54,14 +54,15 @@ export function ChargingHistory({
     }))
     .sort((a, b) => new Date(b.sessions[0].charged_at).getTime() - new Date(a.sessions[0].charged_at).getTime())
 
-  // Calculate year totals by currency
-  const yearTotals = sessions.reduce((acc, s) => {
+  const currentYear = new Date().getFullYear()
+
+  // Calculate year totals by currency - only for current year
+  const currentYearSessions = sessions.filter(s => new Date(s.charged_at).getFullYear() === currentYear)
+  const yearTotals = currentYearSessions.reduce((acc, s) => {
       const currency = s.currency || "JPY"
       acc[currency] = (acc[currency] || 0) + (s.cost || 0)
       return acc
   }, {} as Record<string, number>)
-
-  const currentYear = new Date().getFullYear()
 
   const formatCurrency = (amount: number, currency: string) => {
       const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "¥"
@@ -88,7 +89,7 @@ export function ChargingHistory({
           <div className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             {totalString}
           </div>
-          <p className="text-sm text-muted-foreground mt-1">{sessions.length} charging sessions</p>
+          <p className="text-sm text-muted-foreground mt-1">{currentYearSessions.length} charging sessions</p>
         </CardContent>
       </Card>
 
